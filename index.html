@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hermes Labyrinth Demo</title>
+  <link rel="stylesheet" href="./dashboard/dist/labyrinth.css">
+  <style>
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #080806;
+      color: #ece7d6;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body {
+      padding: 24px;
+    }
+    .demo-shell {
+      max-width: 1680px;
+      margin: 0 auto;
+    }
+    .demo-note {
+      color: #b3ad99;
+      font-size: 13px;
+      margin: 0 0 12px;
+    }
+    .demo-note a {
+      color: #c8d4e8;
+    }
+  </style>
+</head>
+<body>
+  <main class="demo-shell">
+    <p class="demo-note">
+      Static demo harness for the Hermes Labyrinth dashboard plugin. Data is mocked for public preview; the plugin uses real Hermes state when installed in Hermes Agent.
+      <a href="https://github.com/stainlu/hermes-labyrinth">GitHub</a>
+    </p>
+    <div id="app"></div>
+  </main>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      const API_BASE = "/api/plugins/hermes-labyrinth";
+      const journeys = [
+        {
+          journey_id: "j-2026-04-26-cli-7f2a",
+          source: "cli",
+          status: "active",
+          started_at: "2026-04-26T14:02:11Z",
+          last_active: "2026-04-26T14:36:19Z",
+          duration_ms: 2048000,
+          summary: "Refactor billing reconciliation skill; failing on webhook parser",
+          root_prompt: "the billing reconciliation skill keeps blowing up. trace why and fix it.",
+          model_sequence: ["hermes-4-70b", "claude-sonnet-4.5"],
+          model: "claude-sonnet-4.5",
+          message_count: 47,
+          tool_call_count: 22,
+          api_call_count: 31,
+          estimated_cost: "$0.42",
+          token_counts: { input: 142400, output: 38900, cache_read: 410220, cache_write: 21300, reasoning: 12800 }
+        },
+        {
+          journey_id: "j-2026-04-26-cron-3e91",
+          source: "cron",
+          status: "complete",
+          started_at: "2026-04-26T09:00:02Z",
+          ended_at: "2026-04-26T09:11:44Z",
+          duration_ms: 702000,
+          summary: "Daily ops digest to Telegram",
+          root_prompt: "[cron: ops-digest @ 09:00 UTC]",
+          model_sequence: ["hermes-4-70b"],
+          model: "hermes-4-70b",
+          message_count: 18,
+          tool_call_count: 9,
+          api_call_count: 12,
+          estimated_cost: "$0.08",
+          token_counts: { input: 24100, output: 6400, cache_read: 88000, cache_write: 3200, reasoning: 0 }
+        },
+        {
+          journey_id: "j-2026-04-26-sub-9c11",
+          source: "subagent",
+          status: "failed",
+          parent_journey_id: "j-2026-04-26-cli-7f2a",
+          started_at: "2026-04-26T14:09:31Z",
+          ended_at: "2026-04-26T14:13:39Z",
+          duration_ms: 248000,
+          summary: "delegate: identify schema drift in Stripe webhook samples",
+          root_prompt: "[delegated by j-7f2a]",
+          model_sequence: ["minimax-m2.7"],
+          model: "minimax-m2.7",
+          message_count: 11,
+          tool_call_count: 5,
+          api_call_count: 6,
+          estimated_cost: "$0.04",
+          token_counts: { input: 14200, output: 2100, cache_read: 0, cache_write: 0, reasoning: 0 }
+        }
+      ];
+
+      const crossingsByJourney = {
+        "j-2026-04-26-cli-7f2a": [
+          { crossing_id: "c01", type: "prompt", label: "User prompt", actor: "you", target: "agent_loop", started_at: "2026-04-26T14:02:11Z", status: "complete", inputs_preview: "the billing reconciliation skill keeps blowing up. trace why and fix it.", outputs_preview: "", evidence_refs: [{ kind: "message", id: 1 }] },
+          { crossing_id: "c02", type: "memory_op", label: "memory.search", actor: "agent", target: "qdrant", started_at: "2026-04-26T14:02:13Z", duration_ms: 410, status: "complete", inputs_preview: "billing reconciliation skill failures", outputs_preview: "3 hits; prior note mentions Stripe webhook v2 schema drift.", evidence_refs: [{ kind: "message", id: 2 }] },
+          { crossing_id: "c03", type: "tool_call", label: "read_file", actor: "agent", target: "fs", started_at: "2026-04-26T14:02:15Z", duration_ms: 88, status: "complete", inputs_preview: "~/code/billing-reconcile/skills/reconcile/SKILL.md", outputs_preview: "", evidence_refs: [{ kind: "message", id: 3 }] },
+          { crossing_id: "c04", type: "tool_result", label: "read_file", actor: "fs", target: "agent", started_at: "2026-04-26T14:02:15Z", status: "complete", inputs_preview: "", outputs_preview: "1.2KB read; last modified 12 days ago.", evidence_refs: [{ kind: "message", id: 4 }] },
+          { crossing_id: "c05", type: "tool_call", label: "run_python", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:03:01Z", duration_ms: 4120, status: "failed", inputs_preview: "from skills.reconcile import parse_webhook; parse_webhook(sample)", outputs_preview: "", evidence_refs: [{ kind: "message", id: 5 }] },
+          { crossing_id: "c06", type: "tool_result", label: "run_python", actor: "sandbox", target: "agent", started_at: "2026-04-26T14:03:05Z", status: "failed", inputs_preview: "", outputs_preview: "KeyError: 'data.object.charges' - schema drift since stripe-2026-03-15.", evidence_refs: [{ kind: "message", id: 6 }] },
+          { crossing_id: "c07", type: "redaction", label: "redact: stripe key", actor: "hooks", target: "preview", started_at: "2026-04-26T14:04:12Z", status: "complete", inputs_preview: "stripe.api_key = sk_live_demo_1234567890", outputs_preview: "stripe.api_key = sk_live_********", evidence_refs: [{ kind: "message", id: 7 }] },
+          { crossing_id: "c08", type: "model_switch", label: "to claude-sonnet-4.5", actor: "router", target: "model", started_at: "2026-04-26T14:05:02Z", status: "complete", inputs_preview: "fallback after 2 tool failures; context 92%", outputs_preview: "provider: anthropic; fresh context", evidence_refs: [{ kind: "message", id: 8 }] },
+          { crossing_id: "c09", type: "subagent_spawn", label: "delegate_task: schema drift", actor: "agent", target: "subagent", started_at: "2026-04-26T14:09:31Z", status: "complete", inputs_preview: "read stripe webhook samples and identify schema drift", outputs_preview: "spawned j-9c11; model minimax-m2.7", evidence_refs: [{ kind: "message", id: 9 }] },
+          { crossing_id: "c10", type: "approval", label: "approval: write patch", actor: "agent", target: "you", started_at: "2026-04-26T14:13:18Z", duration_ms: 18000, status: "complete", inputs_preview: "patch skills/reconcile/parser.py (3 hunks, 41 lines)", outputs_preview: "approved", evidence_refs: [{ kind: "message", id: 10 }] },
+          { crossing_id: "c11", type: "subagent_return", label: "schema drift: timeout", actor: "subagent", target: "agent", started_at: "2026-04-26T14:13:39Z", status: "failed", inputs_preview: "", outputs_preview: "no final_result; timeout after 4m08s; last action: web_fetch stripe docs", evidence_refs: [{ kind: "message", id: 11 }] },
+          { crossing_id: "c12", type: "context_compression", label: "context compressed", actor: "agent", target: "next_context", started_at: "2026-04-26T14:25:40Z", status: "complete", inputs_preview: "ctx 88%; 47 messages; 12 tool results pruned", outputs_preview: "summary 2.1KB written; ctx 19%", evidence_refs: [{ kind: "message", id: 12 }] }
+        ],
+        "j-2026-04-26-cron-3e91": [
+          { crossing_id: "d01", type: "prompt", label: "Cron trigger", actor: "cron", target: "agent_loop", started_at: "2026-04-26T09:00:02Z", status: "complete", inputs_preview: "[cron: ops-digest @ 09:00 UTC]", outputs_preview: "", evidence_refs: [{ kind: "message", id: 21 }] },
+          { crossing_id: "d02", type: "tool_call", label: "read_logs", actor: "agent", target: "logs", started_at: "2026-04-26T09:00:20Z", duration_ms: 220, status: "complete", inputs_preview: "~/.hermes/logs/gateway.log", outputs_preview: "", evidence_refs: [{ kind: "message", id: 22 }] },
+          { crossing_id: "d03", type: "subagent_spawn", label: "delegate_task: incidents", actor: "agent", target: "subagent", started_at: "2026-04-26T09:01:14Z", status: "complete", inputs_preview: "pull yesterday's incident summary", outputs_preview: "spawned j-b101", evidence_refs: [{ kind: "message", id: 23 }] },
+          { crossing_id: "d04", type: "tool_result", label: "send_message", actor: "telegram", target: "user", started_at: "2026-04-26T09:11:42Z", status: "complete", inputs_preview: "", outputs_preview: "Daily ops digest delivered to Telegram.", evidence_refs: [{ kind: "message", id: 24 }] }
+        ],
+        "j-2026-04-26-sub-9c11": [
+          { crossing_id: "s01", type: "prompt", label: "Delegated prompt", actor: "parent", target: "subagent", started_at: "2026-04-26T14:09:31Z", status: "complete", inputs_preview: "identify Stripe schema drift", outputs_preview: "", evidence_refs: [{ kind: "message", id: 31 }] },
+          { crossing_id: "s02", type: "tool_call", label: "web_fetch", actor: "subagent", target: "stripe docs", started_at: "2026-04-26T14:10:14Z", duration_ms: 812, status: "complete", inputs_preview: "https://stripe.com/docs/webhooks", outputs_preview: "", evidence_refs: [{ kind: "message", id: 32 }] },
+          { crossing_id: "s03", type: "subagent_return", label: "timeout", actor: "subagent", target: "parent", started_at: "2026-04-26T14:13:39Z", status: "failed", inputs_preview: "", outputs_preview: "timed out before final answer", evidence_refs: [{ kind: "message", id: 33 }] }
+        ]
+      };
+
+      const skills = [
+        { name: "billing-reconcile", description: "Parse provider billing exports and reconcile them against internal ledgers.", category: "finance", source: "user", enabled: true, relative_path: "finance/billing-reconcile/SKILL.md", file_count: 6 },
+        { name: "cron", description: "Create, inspect, and manage scheduled Hermes work.", category: "automation", source: "bundled", enabled: true, relative_path: "automation/cron/SKILL.md", file_count: 4 },
+        { name: "dashboard-design", description: "Plan dense dashboard surfaces and evidence-backed observability screens.", category: "design", source: "user", enabled: true, relative_path: "design/dashboard-design/SKILL.md", file_count: 3 },
+        { name: "legacy-stripe-v1", description: "Older Stripe webhook parser notes. Disabled after schema drift.", category: "finance", source: "user", enabled: false, relative_path: "finance/legacy-stripe-v1/SKILL.md", file_count: 2 }
+      ];
+
+      const cron = [
+        { id: "ops-digest", name: "Daily ops digest", enabled: true, state: "scheduled", schedule_display: "0 9 * * *", next_run_at: "2026-04-27T09:00:00Z", last_run_at: "2026-04-26T09:00:02Z", last_status: "complete", deliver: "telegram", workdir: "~/.hermes/cron/ops-digest", model: "hermes-4-70b", skills: ["ops-digest"] },
+        { id: "billing-watch", name: "Billing drift watch", enabled: true, state: "scheduled", schedule_display: "every 6h", next_run_at: "2026-04-26T18:00:00Z", last_run_at: "2026-04-26T12:00:00Z", last_status: "failed", last_error: "parser raised KeyError on charges field", deliver: "local", workdir: "~/code/billing-reconcile", model: "claude-sonnet-4.5", skills: ["billing-reconcile"] }
+      ];
+
+      const guideposts = [
+        { kind: "failure", severity: "warning", title: "Repeated parser failure", detail: "The same webhook parser failed twice before a model switch.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c06" }] },
+        { kind: "delegation", severity: "warning", title: "Subagent timed out", detail: "The schema-drift subagent returned no final result.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c11" }] },
+        { kind: "context", severity: "info", title: "Context compression occurred", detail: "Hermes compressed after the journey crossed 88 percent context.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c12" }] }
+      ];
+
+      function detailFor(id) {
+        const journey = journeys.find(j => j.journey_id === id);
+        const crossings = crossingsByJourney[id] || [];
+        return {
+          journey,
+          child_journeys: journeys.filter(j => j.parent_journey_id === id),
+          crossing_count: crossings.length,
+          guideposts: guideposts.filter(g => g.journey_id === id),
+          generated_at: Date.now() / 1000
+        };
+      }
+
+      function reportFor(id) {
+        const detail = detailFor(id);
+        const j = detail.journey;
+        const crossings = crossingsByJourney[id] || [];
+        if (!j) return "# Hermes Labyrinth Report\n\nJourney not found.\n";
+        return [
+          "# Hermes Labyrinth Report: " + id,
+          "",
+          "## Journey",
+          "- Source: " + j.source,
+          "- Status: " + j.status,
+          "- Model: " + (j.model_sequence || []).join(" -> "),
+          "- Summary: " + j.summary,
+          "",
+          "## Guideposts",
+          ...detail.guideposts.map(g => "- [" + g.severity + "] " + g.title),
+          "",
+          "## Crossings",
+          ...crossings.map(c => "- " + c.type + " / " + c.status + ": " + c.label),
+          ""
+        ].join("\n");
+      }
+
+      function payloadFor(url) {
+        const path = String(url).split("?")[0].replace(API_BASE, "");
+        if (path === "/health") return { ok: true, plugin: "hermes-labyrinth", state_db_exists: true };
+        if (path === "/journeys") return { journeys, total: journeys.length, limit: 40, offset: 0, generated_at: Date.now() / 1000 };
+        if (path === "/skills") return { skills, total: skills.length, duplicates: [], disabled_count: 1, generated_at: Date.now() / 1000 };
+        if (path === "/cron") return { jobs: cron, total: cron.length, generated_at: Date.now() / 1000 };
+        if (path === "/guideposts") return { guideposts, total: guideposts.length, generated_at: Date.now() / 1000 };
+        const crossingMatch = path.match(/^\/journeys\/([^/]+)\/crossings$/);
+        if (crossingMatch) {
+          const id = decodeURIComponent(crossingMatch[1]);
+          return { journey_id: id, crossings: crossingsByJourney[id] || [], threads: [], generated_at: Date.now() / 1000 };
+        }
+        const journeyMatch = path.match(/^\/journeys\/([^/]+)$/);
+        if (journeyMatch) return detailFor(decodeURIComponent(journeyMatch[1]));
+        const reportMatch = path.match(/^\/reports\/(.+)\.md$/);
+        if (reportMatch) return reportFor(decodeURIComponent(reportMatch[1]));
+        return { ok: false, error: "Unknown mock endpoint: " + path };
+      }
+
+      window.__HERMES_PLUGIN_SDK__ = {
+        React,
+        hooks: {
+          useState: React.useState,
+          useEffect: React.useEffect,
+          useCallback: React.useCallback,
+          useMemo: React.useMemo,
+          useRef: React.useRef,
+          useContext: React.useContext,
+          createContext: React.createContext
+        },
+        fetchJSON: function (url) {
+          return Promise.resolve(payloadFor(url));
+        },
+        components: {},
+        utils: {}
+      };
+
+      const nativeFetch = window.fetch.bind(window);
+      window.fetch = function (input, init) {
+        const url = typeof input === "string" ? input : input.url;
+        if (String(url).indexOf(API_BASE) >= 0) {
+          const payload = payloadFor(url);
+          const isText = typeof payload === "string";
+          return Promise.resolve(new Response(isText ? payload : JSON.stringify(payload), {
+            status: 200,
+            headers: { "content-type": isText ? "text/plain" : "application/json" }
+          }));
+        }
+        return nativeFetch(input, init);
+      };
+
+      window.__HERMES_PLUGINS__ = {
+        register: function (name, Component) {
+          if (name !== "hermes-labyrinth") return;
+          ReactDOM.createRoot(document.getElementById("app")).render(React.createElement(Component));
+        },
+        registerSlot: function () {}
+      };
+    })();
+  </script>
+  <script src="./dashboard/dist/index.js"></script>
+</body>
+</html>
