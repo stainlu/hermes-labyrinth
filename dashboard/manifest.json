@@ -1,0 +1,15 @@
+{
+  "name": "hermes-labyrinth",
+  "label": "Labyrinth",
+  "description": "Journey, crossing, skill, cron, and guidepost observability for Hermes Agent.",
+  "icon": "Activity",
+  "version": "0.1.0",
+  "tab": {
+    "path": "/labyrinth",
+    "position": "after:sessions"
+  },
+  "slots": ["header-right"],
+  "entry": "dist/index.js",
+  "api": "plugin_api.py"
+}
+

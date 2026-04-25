@@ -1,0 +1,29 @@
+name: hermes-labyrinth
+label: Hermes Labyrinth
+description: Functional theme scaffold for the Hermes Labyrinth dashboard extension.
+
+# This file is a placeholder atmosphere, not final art direction.
+# Designers should replace these values freely.
+
+layoutVariant: standard
+
+palette:
+  background: "#050505"
+  midground: "#d8c27a"
+  foreground:
+    hex: "#ffffff"
+    alpha: 0.08
+  warmGlow: "rgba(216, 194, 122, 0.18)"
+  noiseOpacity: 0.7
+
+layout:
+  radius: "0.25rem"
+  density: compact
+
+typography:
+  fontSans: "ui-sans-serif, system-ui, sans-serif"
+  fontMono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+  baseSize: "14px"
+  lineHeight: "1.5"
+  letterSpacing: "0"
+
