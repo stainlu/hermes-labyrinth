@@ -29,9 +29,15 @@ plugins/hermes-labyrinth/
     manifest.json
     plugin_api.py
     dist/index.js
+    dist/labyrinth.css
   theme/
     hermes-labyrinth.yaml
 ```
+
+The dashboard implementation follows the `Hermes Labyrinth.html` design
+handoff: top chrome, left route rail, journey index, three map styles,
+crossing inspector, guidepost overlay, skill atlas, cron gate, model ferry,
+memory/context surface, and report surface.
 
 ## Docs
 

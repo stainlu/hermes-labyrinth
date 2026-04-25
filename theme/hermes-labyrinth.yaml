@@ -1,19 +1,20 @@
 name: hermes-labyrinth
 label: Hermes Labyrinth
-description: Functional theme scaffold for the Hermes Labyrinth dashboard extension.
+description: Editorial ink-and-paper dashboard theme for the Hermes Labyrinth extension.
 
-# This file is a placeholder atmosphere, not final art direction.
-# Designers should replace these values freely.
+# The plugin owns its detailed chrome. This theme makes the surrounding Hermes
+# dashboard sit closer to the handoff: paper/ink structure, compact density,
+# graphite thread accent, and restrained gold threshold color.
 
 layoutVariant: standard
 
 palette:
-  background: "#050505"
-  midground: "#d8c27a"
+  background: "#0e0d0a"
+  midground: "#ece7d6"
   foreground:
-    hex: "#ffffff"
+    hex: "#c8d4e8"
     alpha: 0.08
-  warmGlow: "rgba(216, 194, 122, 0.18)"
+  warmGlow: "rgba(201, 168, 87, 0.16)"
   noiseOpacity: 0.7
 
 layout:
@@ -21,9 +22,9 @@ layout:
   density: compact
 
 typography:
-  fontSans: "ui-sans-serif, system-ui, sans-serif"
-  fontMono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+  fontSans: "Inter, ui-sans-serif, system-ui, sans-serif"
+  fontMono: "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+  fontDisplay: "Newsreader, Georgia, serif"
   baseSize: "14px"
   lineHeight: "1.5"
   letterSpacing: "0"
-

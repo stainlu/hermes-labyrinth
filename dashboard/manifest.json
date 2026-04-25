@@ -10,6 +10,6 @@
   },
   "slots": ["header-right"],
   "entry": "dist/index.js",
+  "css": "dist/labyrinth.css",
   "api": "plugin_api.py"
 }
-
