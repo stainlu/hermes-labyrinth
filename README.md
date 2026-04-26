@@ -1,63 +1,52 @@
 # Hermes Labyrinth
 
-Hermes Labyrinth is a read-only dashboard extension for orienting inside Hermes
-Agent activity.
+Where the agent has been.
 
-It normalizes existing Hermes state into:
+Hermes Labyrinth is a read-only observability plugin for
+[Hermes Agent](https://github.com/NousResearch/hermes-agent). It turns agent
+activity into a map of crossings: prompts, tool calls, tool results, failures,
+model switches, subagents, approvals, memory hits, redactions, context
+compression, cron runs, and reportable evidence.
 
-- journeys: sessions, cron runs, gateway work, and delegated child work
-- crossings: prompts, tool calls, tool results, model/context transitions,
-  approvals, and delegation boundaries
-- guideposts: explainable observations backed by local evidence
-- skill atlas: built-in, optional, user, and external skill inventory
-- cron gate: scheduled autonomy and project workdir visibility
-- reports: redacted Markdown exports for debugging and submission
+It is not a chat UI. It is a blackbox recorder for autonomous work.
 
-The visual layer is intentionally minimal. The product behavior is here for a
-designer to shape.
+## Demo
 
-## Folder structure
+- Live demo: https://stainlu.github.io/hermes-labyrinth/
+- Repo: https://github.com/stainlu/hermes-labyrinth
 
-```text
-plugins/hermes-labyrinth/
-  README.md
-  docs/
-    CONCEPT.md
-    FUNCTIONAL_SPEC.md
-    DESIGN_BRIEF.md
-  dashboard/
-    manifest.json
-    plugin_api.py
-    dist/index.js
-    dist/labyrinth.css
-  theme/
-    hermes-labyrinth.yaml
-```
+The public demo is static and uses mocked Hermes state so it can run on GitHub
+Pages. The installable dashboard plugin reads local Hermes state through its
+FastAPI plugin routes.
 
-The dashboard implementation follows the `Hermes Labyrinth.html` design
-handoff: top chrome, left route rail, journey index, three map styles,
-crossing inspector, guidepost overlay, skill atlas, cron gate, model ferry,
-memory/context surface, and report surface.
+## What it does
 
-## Docs
+- **Journey index**: recent CLI, dashboard, gateway, cron, and delegated work.
+- **Labyrinth map**: ordered crossings through a selected agent journey.
+- **Inspector**: input, output, duration, status, evidence, and guideposts for
+  a selected crossing.
+- **Guideposts**: generated observations backed by local evidence.
+- **Skill atlas**: bundled, optional, external, and user skill inventory.
+- **Cron gate**: scheduled autonomy, next runs, last failures, and workdirs.
+- **Model ferry**: model/provider transitions across sessions.
+- **Reports**: redacted Markdown and JSON exports for one journey.
 
-- [Concept](./docs/CONCEPT.md)
-- [Functional spec](./docs/FUNCTIONAL_SPEC.md)
-- [Design brief](./docs/DESIGN_BRIEF.md)
+## Install
 
-## Install from a repo checkout
-
-The dashboard plugin is auto-discovered because this directory lives under
-`plugins/`.
-
-To install the theme scaffold:
+Install into the Hermes user plugin directory:
 
 ```bash
-mkdir -p ~/.hermes/dashboard-themes
-cp plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dashboard-themes/
+mkdir -p ~/.hermes/plugins
+git clone https://github.com/stainlu/hermes-labyrinth.git ~/.hermes/plugins/hermes-labyrinth
 ```
 
-Restart `hermes dashboard`, or call:
+Start or restart the dashboard:
+
+```bash
+hermes dashboard
+```
+
+If the dashboard is already running, rescan plugins:
 
 ```bash
 curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
@@ -65,9 +54,75 @@ curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
 
 Open the dashboard and select the `Labyrinth` tab.
 
-## Data policy
+Optional theme scaffold:
 
-- The plugin is read-only.
+```bash
+mkdir -p ~/.hermes/dashboard-themes
+cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dashboard-themes/
+```
+
+## Repository Layout
+
+```text
+.
+├── dashboard/
+│   ├── manifest.json        # Hermes dashboard plugin manifest
+│   ├── plugin_api.py        # Read-only API over local Hermes state
+│   └── dist/                # Dashboard plugin bundle
+├── docs/
+│   ├── CONCEPT.md
+│   ├── DESIGN_BRIEF.md
+│   └── FUNCTIONAL_SPEC.md
+├── theme/
+│   └── hermes-labyrinth.yaml
+├── index.html               # Static GitHub Pages demo
+└── Hermes Labyrinth _standalone_.html
+```
+
+## Architecture
+
+```text
+Hermes local state
+  ├─ state.db sessions/messages
+  ├─ skills directories
+  └─ cron config
+        ↓
+dashboard/plugin_api.py
+        ↓
+/api/plugins/hermes-labyrinth/*
+        ↓
+dashboard/dist/index.js
+        ↓
+Hermes dashboard tab: Labyrinth
+```
+
+The plugin is read-only. It does not start, stop, mutate, or create Hermes
+sessions.
+
+## API Surface
+
+```text
+GET /api/plugins/hermes-labyrinth/health
+GET /api/plugins/hermes-labyrinth/journeys
+GET /api/plugins/hermes-labyrinth/journeys/{journey_id}
+GET /api/plugins/hermes-labyrinth/journeys/{journey_id}/crossings
+GET /api/plugins/hermes-labyrinth/skills
+GET /api/plugins/hermes-labyrinth/cron
+GET /api/plugins/hermes-labyrinth/guideposts
+GET /api/plugins/hermes-labyrinth/reports/{journey_id}.json
+GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
+```
+
+## Data Policy
+
+- Read-only by design.
 - Secret redaction is applied to previews and reports.
-- Unknown fields remain unknown.
-- The report endpoint is generated from local Hermes state.
+- Unknown fields stay unknown.
+- Reports are generated from local Hermes state.
+- The public demo uses sample data and should not be treated as live telemetry.
+
+## Status
+
+Hackathon build, moving toward production readiness. See
+[Known Limitations](./KNOWN_LIMITATIONS.md) and [Roadmap](./ROADMAP.md).
+

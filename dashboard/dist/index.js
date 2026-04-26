@@ -3838,27 +3838,7 @@
       style: {
         color: "var(--ink-3)"
       }
-    }, guidepostCount)), React.createElement("button", {
-      title: "New journey",
-      style: {
-        display: "inline-flex",
-        gap: 6,
-        alignItems: "center",
-        padding: "5px 10px",
-        background: "var(--ink)",
-        color: "var(--paper)",
-        border: "1px solid var(--ink)",
-        borderRadius: 2,
-        cursor: "pointer",
-        fontFamily: "var(--font-mono)",
-        fontSize: 10.5,
-        letterSpacing: "0.04em",
-        textTransform: "uppercase"
-      }
-    }, React.createElement(LucideIcon, {
-      name: "plus",
-      size: 12
-    }), " New journey"));
+    }, guidepostCount)));
   }
   function LeftNav({
     route,
