@@ -1,0 +1,29 @@
+import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
+
+const checks = [
+  ["node", ["scripts/build-plugin.mjs", "--check"]],
+  ["node", ["--check", "dashboard/dist/index.js"]],
+  ["python3", ["-m", "py_compile", "dashboard/plugin_api.py"]],
+  ["python3", ["-m", "html.parser", "index.html"]],
+  ["python3", ["-m", "html.parser", "Hermes Labyrinth _standalone_.html"]],
+];
+
+for (const [cmd, args] of checks) {
+  const label = [cmd, ...args].join(" ");
+  const result = spawnSync(cmd, args, { stdio: "inherit" });
+  if (result.status !== 0) {
+    console.error(`failed: ${label}`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+for (const file of ["dashboard/dist/index.js", "index.html", "Hermes Labyrinth _standalone_.html"]) {
+  const content = readFileSync(file, "utf8");
+  if (/New journey|new journey/.test(content)) {
+    console.error(`dead New journey affordance found in ${file}`);
+    process.exit(1);
+  }
+}
+
+console.log("all checks passed");

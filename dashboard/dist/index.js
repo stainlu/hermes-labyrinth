@@ -1,3 +1,4 @@
+// Generated from src/parts/*.js by scripts/build-plugin.mjs. Do not edit dashboard/dist/index.js directly.
 (function () {
   "use strict";
 
@@ -11,6 +12,7 @@
   } = React;
   const API = "/api/plugins/hermes-labyrinth";
   const uiUseState = React.useState;
+
   const SAMPLE_DATA = (() => {
     const journeys = [{
       id: "j-2026-04-26-cli-7f2a",
@@ -856,6 +858,7 @@
       cron
     };
   })();
+
   const CrossingGlyph = ({
     type,
     size = 16,
@@ -1252,6 +1255,7 @@
     SourceGlyph,
     LucideIcon
   });
+
   function MapThread({
     crossings,
     selectedId,
@@ -1704,6 +1708,7 @@
   Object.assign(window, {
     LabyrinthMap
   });
+
   function Inspector({
     crossing,
     redaction,
@@ -2115,6 +2120,7 @@
     Inspector,
     GuidepostsPanel
   });
+
   function JourneyIndex({
     journeys,
     selectedId,
@@ -3377,6 +3383,7 @@
     MemoryMap,
     LabyrinthReport
   });
+
   function useTweaks(defaults) {
     const [values, setValues] = React.useState(defaults);
     const setTweak = React.useCallback((key, val) => setValues(prev => ({
@@ -4006,6 +4013,7 @@
       }
     }), React.createElement("span", null, "last frame ", String(tick).padStart(3, "0")), React.createElement("span", null, "\xB7"), React.createElement("span", null, new Date().toISOString().slice(11, 19), "Z"));
   }
+
   function pad2(n) {
     return String(n).padStart(2, "0");
   }
@@ -4191,6 +4199,7 @@
       });
     });
   }
+
   function LabyrinthPage() {
     const demo = !!window.__HERMES_LABYRINTH_DEMO__;
     const [data, setData] = React.useState(demo ? sampleAsApiData() : null);

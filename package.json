@@ -1,0 +1,13 @@
+{
+  "name": "hermes-labyrinth",
+  "version": "0.1.0",
+  "description": "Read-only Hermes Agent observability plugin that maps sessions as journeys through crossings.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-plugin.mjs",
+    "check": "node scripts/verify.mjs"
+  },
+  "license": "MIT"
+}
+

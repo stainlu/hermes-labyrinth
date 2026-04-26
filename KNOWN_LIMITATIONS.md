@@ -1,7 +1,8 @@
 # Known Limitations
 
-Hermes Labyrinth is currently a hackathon build. The demo is polished, but the
-repo still needs a production source/build/test pipeline.
+Hermes Labyrinth is currently a hackathon build. The demo is polished, and the
+repo now has a source/build/check path, but it still needs deeper tests and a
+more modular frontend source tree.
 
 ## Demo
 
@@ -23,9 +24,10 @@ repo still needs a production source/build/test pipeline.
 
 ## Repository
 
-- `dashboard/dist/index.js` is checked in as the installable dashboard bundle.
-- There is not yet a first-class `src/` tree or build command.
+- `dashboard/dist/*` is checked in as the installable dashboard bundle.
+- `src/parts/*.js` are ordered browser chunks, not true ES modules yet. They
+  should be converted into explicit component, data, normalization, and
+  plugin-registration modules.
 - Frontend smoke tests and backend API fixtures are not in place yet.
 - `Hermes Labyrinth _standalone_.html` is kept as the design/demo artifact and
   should not be treated as maintainable source.
-

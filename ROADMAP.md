@@ -3,15 +3,13 @@
 ## Now
 
 - Keep the public demo stable.
-- Remove dead controls and make every visible action either work or clearly
-  read as read-only.
-- Document demo versus live plugin behavior.
-- Add basic repo hygiene: license, ignore rules, limitations, and roadmap.
+- Keep every visible action either working or clearly read-only.
+- Keep `dashboard/dist` reproducible from `src`.
+- Add API and frontend smoke tests.
 
 ## Next
 
-- Move the dashboard UI into maintainable source modules under `src/`.
-- Add a reproducible build command for `dashboard/dist/index.js`.
+- Convert `src/parts/*.js` into true ES modules with focused exports/imports.
 - Replace the standalone GitHub Pages bundle with a normal static demo harness.
 - Add backend tests for state-db absence, journey listing, crossing inference,
   redaction, guideposts, and report generation.
@@ -26,4 +24,3 @@
 - Add a subagent tree with parent/child journey navigation.
 - Add optional hook recording for precise tool durations and boundary events.
 - Cut a tagged `v0.1.0` release once source, build, and tests are in place.
-

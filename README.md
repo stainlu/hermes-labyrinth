@@ -68,16 +68,42 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 ├── dashboard/
 │   ├── manifest.json        # Hermes dashboard plugin manifest
 │   ├── plugin_api.py        # Read-only API over local Hermes state
-│   └── dist/                # Dashboard plugin bundle
+│   └── dist/                # Generated dashboard plugin bundle
 ├── docs/
 │   ├── CONCEPT.md
 │   ├── DESIGN_BRIEF.md
 │   └── FUNCTIONAL_SPEC.md
+├── scripts/
+│   ├── build-plugin.mjs     # Builds dashboard/dist from src
+│   └── verify.mjs           # Local verification checks
+├── src/
+│   ├── parts/               # Ordered frontend source chunks
+│   └── labyrinth.css        # Frontend CSS source
 ├── theme/
 │   └── hermes-labyrinth.yaml
 ├── index.html               # Static GitHub Pages demo
+├── package.json             # Build/check scripts, no runtime deps
 └── Hermes Labyrinth _standalone_.html
 ```
+
+## Development
+
+`dashboard/dist/` is generated from `src/parts/*.js` and `src/labyrinth.css`.
+It is checked in because Hermes dashboard plugins are loaded directly from
+built static files.
+
+```bash
+npm run build
+npm run check
+```
+
+`npm run check` verifies:
+
+- `dashboard/dist` is up to date with `src`
+- frontend JavaScript parses
+- backend Python parses
+- both static HTML demo artifacts parse
+- the removed `New journey` dead control has not returned
 
 ## Architecture
 
@@ -91,7 +117,9 @@ dashboard/plugin_api.py
         ↓
 /api/plugins/hermes-labyrinth/*
         ↓
-dashboard/dist/index.js
+src/parts/*.js + src/labyrinth.css
+        ↓ npm run build
+dashboard/dist/*
         ↓
 Hermes dashboard tab: Labyrinth
 ```
@@ -125,4 +153,3 @@ GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
 
 Hackathon build, moving toward production readiness. See
 [Known Limitations](./KNOWN_LIMITATIONS.md) and [Roadmap](./ROADMAP.md).
-
