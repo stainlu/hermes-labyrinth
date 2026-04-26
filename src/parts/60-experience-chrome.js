@@ -31,6 +31,7 @@
   function LabyrinthExperience({
     data
   }) {
+    const D = data || SAMPLE_DATA;
     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
     const [route, setRoute] = useState("labyrinth");
     const [selectedJourneyId, setSelectedJourneyId] = useState(t.dataset === "debug" ? D.debugJourneyId || "j-2026-04-26-cli-7f2a" : D.cleanJourneyId || "j-2026-04-26-cron-3e91");
@@ -43,8 +44,7 @@
     }, []);
     useEffect(() => {
       if (t.dataset === "debug") setSelectedJourneyId(D.debugJourneyId || D.journeys[0]?.id || null);else setSelectedJourneyId(D.cleanJourneyId || D.journeys.find(j => j.status === "complete")?.id || D.journeys[0]?.id || null);
-    }, [t.dataset]);
-    const D = data || SAMPLE_DATA;
+    }, [t.dataset, D]);
     const journeys = D.journeys;
     const journey = journeys.find(j => j.id === selectedJourneyId);
     const crossings = useMemo(() => {

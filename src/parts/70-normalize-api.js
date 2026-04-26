@@ -39,7 +39,7 @@
       id,
       source: j.source || "unknown",
       status: j.status || "unknown",
-      started_at: j.started_at || "unknown",
+      started_at: formatDateTime(j.started_at),
       duration_label: j.duration_label || durationLabel(j.duration_ms),
       duration_ms: j.duration_ms,
       title: j.title || j.summary || j.root_prompt || "Untitled journey",
