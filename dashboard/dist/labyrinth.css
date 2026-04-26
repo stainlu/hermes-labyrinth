@@ -21,14 +21,43 @@
   --hl-font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --hl-font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --hl-font-display: "Newsreader", Georgia, "Times New Roman", serif;
+  --paper: var(--hl-paper);
+  --paper-2: var(--hl-paper-2);
+  --paper-3: var(--hl-paper-3);
+  --card: var(--hl-card);
+  --vellum: var(--hl-vellum);
+  --ink: var(--hl-ink);
+  --ink-2: var(--hl-ink-2);
+  --ink-3: var(--hl-ink-3);
+  --ink-4: var(--hl-ink-4);
+  --ink-5: var(--hl-ink-5);
+  --line: var(--hl-line);
+  --line-2: var(--hl-line-2);
+  --line-3: var(--hl-ink);
+  --thread: var(--hl-thread);
+  --thread-soft: var(--hl-thread-soft);
+  --thread-wash: var(--hl-thread-soft);
+  --thread-ring: rgba(200, 212, 232, 0.28);
+  --gold: var(--hl-gold);
+  --gold-soft: var(--hl-gold-soft);
+  --ok: var(--hl-ok);
+  --warn: var(--hl-warn);
+  --danger: var(--hl-danger);
+  --unknown: var(--hl-ink-3);
+  --font-sans: var(--hl-font-sans);
+  --font-mono: var(--hl-font-mono);
+  --font-display: var(--hl-font-display);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --focus-ring: 0 0 0 2px var(--paper), 0 0 0 4px var(--thread-ring);
   color: var(--hl-ink);
   background: var(--hl-paper);
-  border: 1px solid var(--hl-ink);
   font-family: var(--hl-font-sans);
   font-size: 13px;
   line-height: 1.5;
-  min-height: min(920px, calc(100vh - 120px));
-  max-height: calc(100vh - 112px);
+  width: 100%;
+  height: 100vh;
+  min-height: 720px;
+  max-height: 100vh;
   display: grid;
   grid-template-columns: 56px 340px minmax(420px, 1fr) 380px;
   grid-template-rows: 56px minmax(0, 1fr) 28px;
@@ -79,6 +108,60 @@
   background: var(--hl-thread-soft);
 }
 
+.hl-root .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+.hl-root .eyebrow .dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: currentColor;
+  border-radius: 50%;
+  margin: 0 8px 2px 0;
+  vertical-align: middle;
+}
+
+.hl-root .mono {
+  font-family: var(--font-mono);
+}
+
+.hl-root .italic-display {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.hl-root .hardline {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  margin: 0;
+}
+
+.hl-root .live-cursor {
+  display: inline-block;
+  width: 0.55ch;
+  height: 1em;
+  background: var(--ink);
+  vertical-align: -2px;
+  margin-left: 2px;
+  animation: blink-cursor 1.1s steps(2) infinite;
+}
+
+.hl-root .pulse {
+  animation: pulse-soft 2s var(--ease) infinite;
+}
+
+.hl-root .thread-active {
+  animation: thread-shimmer 2.4s var(--ease) infinite;
+}
+
 .hl-root:before {
   content: "";
   position: absolute;
@@ -100,8 +183,8 @@
   grid-row: 1 / 2;
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 16px;
+  gap: 14px;
+  padding: 0 18px;
   border-bottom: 1px solid var(--hl-ink);
   background: var(--hl-paper);
   position: relative;
@@ -112,14 +195,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  min-width: 240px;
+  min-width: 282px;
 }
 
 .hl-brand-title,
 .hl-display {
   font-family: var(--hl-font-display);
   font-style: italic;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .hl-brand-title {
@@ -289,7 +372,14 @@
   font-style: italic;
   font-size: 30px;
   line-height: 1.15;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+}
+
+.hl-panel-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .hl-search {
@@ -653,6 +743,21 @@
 @keyframes hl-thread {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.52; }
+}
+
+@keyframes blink-cursor {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@keyframes thread-shimmer {
+  0%, 100% { stroke-opacity: 1; }
+  50% { stroke-opacity: 0.55; }
 }
 
 @media (max-width: 1300px) {

@@ -8,42 +8,33 @@
   <style>
     html, body {
       margin: 0;
+      width: 100%;
       min-height: 100%;
       background: #080806;
       color: #ece7d6;
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     }
     body {
-      padding: 24px;
+      overflow: hidden;
     }
     .demo-shell {
-      max-width: 1680px;
-      margin: 0 auto;
-    }
-    .demo-note {
-      color: #b3ad99;
-      font-size: 13px;
-      margin: 0 0 12px;
-    }
-    .demo-note a {
-      color: #c8d4e8;
+      width: 100vw;
+      height: 100vh;
     }
   </style>
 </head>
 <body>
   <main class="demo-shell">
-    <p class="demo-note">
-      Static demo harness for the Hermes Labyrinth dashboard plugin. Data is mocked for public preview; the plugin uses real Hermes state when installed in Hermes Agent.
-      <a href="https://github.com/stainlu/hermes-labyrinth">GitHub</a>
-    </p>
     <div id="app"></div>
   </main>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="./dashboard/dist/vendor/react.js"></script>
+  <script src="./dashboard/dist/vendor/react-dom.js"></script>
   <script>
     (function () {
       "use strict";
+
+      window.__HERMES_LABYRINTH_DEMO__ = true;
 
       const API_BASE = "/api/plugins/hermes-labyrinth";
       const journeys = [
@@ -54,13 +45,16 @@
           started_at: "2026-04-26T14:02:11Z",
           last_active: "2026-04-26T14:36:19Z",
           duration_ms: 2048000,
-          summary: "Refactor billing reconciliation skill; failing on webhook parser",
+          summary: "Refactor billing reconciliation skill - failing on stripe webhook parser",
           root_prompt: "the billing reconciliation skill keeps blowing up. trace why and fix it.",
           model_sequence: ["hermes-4-70b", "claude-sonnet-4.5"],
           model: "claude-sonnet-4.5",
           message_count: 47,
           tool_call_count: 22,
           api_call_count: 31,
+          crossing_count: 20,
+          failure_count: 5,
+          threshold_count: 4,
           estimated_cost: "$0.42",
           token_counts: { input: 142400, output: 38900, cache_read: 410220, cache_write: 21300, reasoning: 12800 }
         },
@@ -78,8 +72,31 @@
           message_count: 18,
           tool_call_count: 9,
           api_call_count: 12,
+          crossing_count: 9,
+          failure_count: 0,
+          threshold_count: 4,
           estimated_cost: "$0.08",
           token_counts: { input: 24100, output: 6400, cache_read: 88000, cache_write: 3200, reasoning: 0 }
+        },
+        {
+          journey_id: "j-2026-04-26-gateway-c401",
+          source: "gateway",
+          status: "complete",
+          started_at: "2026-04-26T13:14:55Z",
+          ended_at: "2026-04-26T13:16:58Z",
+          duration_ms: 123000,
+          summary: "Telegram -> quick lookup, what's the cron job that posts to slack?",
+          root_prompt: "what's the cron job that posts to slack?",
+          model_sequence: ["hermes-4-70b"],
+          model: "hermes-4-70b",
+          message_count: 6,
+          tool_call_count: 2,
+          api_call_count: 3,
+          crossing_count: 4,
+          failure_count: 0,
+          threshold_count: 2,
+          estimated_cost: "$0.01",
+          token_counts: { input: 5100, output: 900, cache_read: 12000, cache_write: 0, reasoning: 0 }
         },
         {
           journey_id: "j-2026-04-26-sub-9c11",
@@ -89,32 +106,144 @@
           started_at: "2026-04-26T14:09:31Z",
           ended_at: "2026-04-26T14:13:39Z",
           duration_ms: 248000,
-          summary: "delegate: identify schema drift in Stripe webhook samples",
+          summary: "delegate: read stripe webhook samples and identify schema drift",
           root_prompt: "[delegated by j-7f2a]",
           model_sequence: ["minimax-m2.7"],
           model: "minimax-m2.7",
           message_count: 11,
           tool_call_count: 5,
           api_call_count: 6,
+          crossing_count: 5,
+          failure_count: 2,
+          threshold_count: 1,
           estimated_cost: "$0.04",
           token_counts: { input: 14200, output: 2100, cache_read: 0, cache_write: 0, reasoning: 0 }
+        },
+        {
+          journey_id: "j-2026-04-26-sub-a2d4",
+          source: "subagent",
+          status: "complete",
+          parent_journey_id: "j-2026-04-26-cli-7f2a",
+          started_at: "2026-04-26T14:21:11Z",
+          ended_at: "2026-04-26T14:28:06Z",
+          duration_ms: 415000,
+          summary: "delegate: write a regression test that reproduces the parser crash",
+          root_prompt: "[delegated by j-7f2a]",
+          model_sequence: ["claude-sonnet-4.5"],
+          model: "claude-sonnet-4.5",
+          message_count: 14,
+          tool_call_count: 7,
+          api_call_count: 8,
+          crossing_count: 7,
+          failure_count: 0,
+          threshold_count: 2,
+          estimated_cost: "$0.07",
+          token_counts: { input: 25200, output: 4300, cache_read: 7000, cache_write: 1800, reasoning: 1100 }
+        },
+        {
+          journey_id: "j-2026-04-26-dashboard-bb87",
+          source: "dashboard",
+          status: "interrupted",
+          started_at: "2026-04-26T22:41:08Z",
+          ended_at: "2026-04-26T23:00:00Z",
+          duration_ms: 1132000,
+          summary: "draft a postmortem for the friday outage",
+          root_prompt: "draft a postmortem for the friday outage",
+          model_sequence: ["hermes-4-70b", "claude-sonnet-4.5"],
+          model: "claude-sonnet-4.5",
+          message_count: 22,
+          tool_call_count: 10,
+          api_call_count: 12,
+          crossing_count: 12,
+          failure_count: 1,
+          threshold_count: 3,
+          estimated_cost: "$0.19",
+          token_counts: { input: 62100, output: 8800, cache_read: 129000, cache_write: 12000, reasoning: 2400 }
+        },
+        {
+          journey_id: "j-2026-04-26-cli-1a02",
+          source: "cli",
+          status: "complete",
+          started_at: "2026-04-26T16:08:00Z",
+          ended_at: "2026-04-26T16:50:19Z",
+          duration_ms: 2539000,
+          summary: "set up a daily cron that summarizes my discord pings",
+          root_prompt: "set up a daily cron that summarizes my discord pings",
+          model_sequence: ["hermes-4-70b"],
+          model: "hermes-4-70b",
+          message_count: 31,
+          tool_call_count: 14,
+          api_call_count: 19,
+          crossing_count: 14,
+          failure_count: 0,
+          threshold_count: 5,
+          estimated_cost: "$0.13",
+          token_counts: { input: 48300, output: 7200, cache_read: 96000, cache_write: 6400, reasoning: 0 }
+        },
+        {
+          journey_id: "j-2026-04-26-cron-2244",
+          source: "cron",
+          status: "failed",
+          started_at: "2026-04-26T02:00:04Z",
+          ended_at: "2026-04-26T02:05:10Z",
+          duration_ms: 306000,
+          summary: "nightly github issue triage",
+          root_prompt: "[cron: issue-triage @ 02:00 UTC]",
+          model_sequence: ["hermes-4-70b"],
+          model: "hermes-4-70b",
+          message_count: 9,
+          tool_call_count: 4,
+          api_call_count: 5,
+          crossing_count: 5,
+          failure_count: 1,
+          threshold_count: 1,
+          estimated_cost: "$0.03",
+          token_counts: { input: 12300, output: 1900, cache_read: 34000, cache_write: 0, reasoning: 0 }
+        },
+        {
+          journey_id: "j-2026-04-26-gateway-a19d",
+          source: "gateway",
+          status: "complete",
+          started_at: "2026-04-26T00:48:18Z",
+          ended_at: "2026-04-26T00:54:08Z",
+          duration_ms: 350000,
+          summary: "summarize the overnight model routing anomalies",
+          root_prompt: "summarize the overnight model routing anomalies",
+          model_sequence: ["hermes-4-70b", "claude-sonnet-4.5"],
+          model: "claude-sonnet-4.5",
+          message_count: 13,
+          tool_call_count: 3,
+          api_call_count: 5,
+          crossing_count: 6,
+          failure_count: 0,
+          threshold_count: 2,
+          estimated_cost: "$0.05",
+          token_counts: { input: 22100, output: 3100, cache_read: 44000, cache_write: 1200, reasoning: 800 }
         }
       ];
 
       const crossingsByJourney = {
         "j-2026-04-26-cli-7f2a": [
-          { crossing_id: "c01", type: "prompt", label: "User prompt", actor: "you", target: "agent_loop", started_at: "2026-04-26T14:02:11Z", status: "complete", inputs_preview: "the billing reconciliation skill keeps blowing up. trace why and fix it.", outputs_preview: "", evidence_refs: [{ kind: "message", id: 1 }] },
-          { crossing_id: "c02", type: "memory_op", label: "memory.search", actor: "agent", target: "qdrant", started_at: "2026-04-26T14:02:13Z", duration_ms: 410, status: "complete", inputs_preview: "billing reconciliation skill failures", outputs_preview: "3 hits; prior note mentions Stripe webhook v2 schema drift.", evidence_refs: [{ kind: "message", id: 2 }] },
-          { crossing_id: "c03", type: "tool_call", label: "read_file", actor: "agent", target: "fs", started_at: "2026-04-26T14:02:15Z", duration_ms: 88, status: "complete", inputs_preview: "~/code/billing-reconcile/skills/reconcile/SKILL.md", outputs_preview: "", evidence_refs: [{ kind: "message", id: 3 }] },
-          { crossing_id: "c04", type: "tool_result", label: "read_file", actor: "fs", target: "agent", started_at: "2026-04-26T14:02:15Z", status: "complete", inputs_preview: "", outputs_preview: "1.2KB read; last modified 12 days ago.", evidence_refs: [{ kind: "message", id: 4 }] },
-          { crossing_id: "c05", type: "tool_call", label: "run_python", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:03:01Z", duration_ms: 4120, status: "failed", inputs_preview: "from skills.reconcile import parse_webhook; parse_webhook(sample)", outputs_preview: "", evidence_refs: [{ kind: "message", id: 5 }] },
-          { crossing_id: "c06", type: "tool_result", label: "run_python", actor: "sandbox", target: "agent", started_at: "2026-04-26T14:03:05Z", status: "failed", inputs_preview: "", outputs_preview: "KeyError: 'data.object.charges' - schema drift since stripe-2026-03-15.", evidence_refs: [{ kind: "message", id: 6 }] },
-          { crossing_id: "c07", type: "redaction", label: "redact: stripe key", actor: "hooks", target: "preview", started_at: "2026-04-26T14:04:12Z", status: "complete", inputs_preview: "stripe.api_key = sk_live_demo_1234567890", outputs_preview: "stripe.api_key = sk_live_********", evidence_refs: [{ kind: "message", id: 7 }] },
-          { crossing_id: "c08", type: "model_switch", label: "to claude-sonnet-4.5", actor: "router", target: "model", started_at: "2026-04-26T14:05:02Z", status: "complete", inputs_preview: "fallback after 2 tool failures; context 92%", outputs_preview: "provider: anthropic; fresh context", evidence_refs: [{ kind: "message", id: 8 }] },
-          { crossing_id: "c09", type: "subagent_spawn", label: "delegate_task: schema drift", actor: "agent", target: "subagent", started_at: "2026-04-26T14:09:31Z", status: "complete", inputs_preview: "read stripe webhook samples and identify schema drift", outputs_preview: "spawned j-9c11; model minimax-m2.7", evidence_refs: [{ kind: "message", id: 9 }] },
-          { crossing_id: "c10", type: "approval", label: "approval: write patch", actor: "agent", target: "you", started_at: "2026-04-26T14:13:18Z", duration_ms: 18000, status: "complete", inputs_preview: "patch skills/reconcile/parser.py (3 hunks, 41 lines)", outputs_preview: "approved", evidence_refs: [{ kind: "message", id: 10 }] },
-          { crossing_id: "c11", type: "subagent_return", label: "schema drift: timeout", actor: "subagent", target: "agent", started_at: "2026-04-26T14:13:39Z", status: "failed", inputs_preview: "", outputs_preview: "no final_result; timeout after 4m08s; last action: web_fetch stripe docs", evidence_refs: [{ kind: "message", id: 11 }] },
-          { crossing_id: "c12", type: "context_compression", label: "context compressed", actor: "agent", target: "next_context", started_at: "2026-04-26T14:25:40Z", status: "complete", inputs_preview: "ctx 88%; 47 messages; 12 tool results pruned", outputs_preview: "summary 2.1KB written; ctx 19%", evidence_refs: [{ kind: "message", id: 12 }] }
+          { crossing_id: "c01", type: "prompt", label: "User prompt", actor: "you", target: "agent_loop", started_at: "2026-04-26T14:02:11Z", status: "complete", inputs_preview: "the billing reconciliation skill keeps blowing up. trace why and fix it.", outputs_preview: "", evidence_refs: [{ kind: "message", id: "m01" }] },
+          { crossing_id: "c02", type: "memory_op", label: "memory.search", actor: "agent", target: "qdrant", started_at: "2026-04-26T14:02:13Z", duration_ms: 410, status: "complete", inputs_preview: "billing reconciliation skill failures", outputs_preview: "3 hits; prior note mentions Stripe webhook v2 schema drift.", evidence_refs: [{ kind: "message", id: "m02" }] },
+          { crossing_id: "c03", type: "tool_call", label: "read_file", actor: "agent", target: "fs", started_at: "2026-04-26T14:02:15Z", duration_ms: 88, status: "complete", inputs_preview: "~/code/billing-reconcile/skills/reconcile/SKILL.md", outputs_preview: "", evidence_refs: [{ kind: "message", id: "m03" }] },
+          { crossing_id: "c04", type: "tool_result", label: "read_file", actor: "fs", target: "agent", started_at: "2026-04-26T14:02:15Z", status: "complete", inputs_preview: "", outputs_preview: "1.2KB read; last modified 12 days ago.", evidence_refs: [{ kind: "message", id: "m04" }] },
+          { crossing_id: "c05", type: "tool_call", label: "run_python", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:03:01Z", duration_ms: 4120, status: "failed", inputs_preview: "from skills.reconcile import parse_webhook; parse_webhook(sample)", outputs_preview: "Traceback: KeyError at charges", evidence_refs: [{ kind: "message", id: "m05" }] },
+          { crossing_id: "c06", type: "tool_call", label: "run_python", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:03:05Z", status: "failed", inputs_preview: "parse_webhook(sample_v2)", outputs_preview: "KeyError: 'data.object.charges'", evidence_refs: [{ kind: "message", id: "m06" }] },
+          { crossing_id: "c07", type: "tool_call", label: "run_python", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:03:48Z", duration_ms: 3980, status: "failed", inputs_preview: "parse_webhook(sample_with_charge_data)", outputs_preview: "KeyError: 'data.object.charges.data'", evidence_refs: [{ kind: "message", id: "m07" }] },
+          { crossing_id: "c08", type: "tool_result", label: "run_python", actor: "sandbox", target: "agent", started_at: "2026-04-26T14:03:52Z", status: "failed", inputs_preview: "", outputs_preview: "KeyError: 'data.object.charges.data' - same shape, deeper miss.", evidence_refs: [{ kind: "message", id: "m08 - session.db" }, { kind: "tool log", id: "~/.hermes/logs/tools/run_python.jsonl" }] },
+          { crossing_id: "c09", type: "redaction", label: "redact: stripe key", actor: "hooks", target: "preview", started_at: "2026-04-26T14:04:12Z", status: "complete", inputs_preview: "stripe.api_key = sk_live_demo_1234567890", outputs_preview: "stripe.api_key = sk_live_********", evidence_refs: [{ kind: "message", id: "m09" }] },
+          { crossing_id: "c10", type: "model_switch", label: "to claude-sonnet-4.5", actor: "router", target: "model", started_at: "2026-04-26T14:05:02Z", status: "complete", inputs_preview: "fallback after 2 tool failures; context 92%", outputs_preview: "provider: anthropic; fresh context", evidence_refs: [{ kind: "message", id: "m10" }] },
+          { crossing_id: "c11", type: "subagent_spawn", label: "delegate_task: schema drift", actor: "agent", target: "subagent", started_at: "2026-04-26T14:09:31Z", status: "complete", inputs_preview: "read stripe webhook samples and identify schema drift", outputs_preview: "spawned sub-9c11; model minimax-m2.7", evidence_refs: [{ kind: "message", id: "m11" }] },
+          { crossing_id: "c12", type: "approval", label: "approval: write patch", actor: "agent", target: "you", started_at: "2026-04-26T14:13:18Z", duration_ms: 18000, status: "complete", inputs_preview: "write to ~/code/billing-reconcile", outputs_preview: "approved", evidence_refs: [{ kind: "message", id: "m12" }] },
+          { crossing_id: "c13", type: "tool_call", label: "edit_file", actor: "agent", target: "fs", started_at: "2026-04-26T14:13:37Z", duration_ms: 240, status: "complete", inputs_preview: "patch parser.py fallback for charges.data", outputs_preview: "3 hunks applied", evidence_refs: [{ kind: "message", id: "m13" }] },
+          { crossing_id: "c14", type: "subagent_return", label: "schema drift: timeout", actor: "subagent", target: "agent", started_at: "2026-04-26T14:13:39Z", status: "failed", inputs_preview: "", outputs_preview: "no final_result; timeout after 4m08s; last action: web_fetch stripe docs", evidence_refs: [{ kind: "message", id: "m14" }] },
+          { crossing_id: "c15", type: "tool_call", label: "write_test", actor: "agent", target: "fs", started_at: "2026-04-26T14:18:44Z", duration_ms: 320, status: "complete", inputs_preview: "test_webhook_parser_handles_charges_data", outputs_preview: "test added", evidence_refs: [{ kind: "message", id: "m15" }] },
+          { crossing_id: "c16", type: "tool_call", label: "run_tests", actor: "agent", target: "sandbox", started_at: "2026-04-26T14:20:05Z", duration_ms: 9200, status: "complete", inputs_preview: "pytest tests/test_reconcile_parser.py", outputs_preview: "7 passed", evidence_refs: [{ kind: "message", id: "m16" }] },
+          { crossing_id: "c17", type: "subagent_spawn", label: "delegate_task: regression", actor: "agent", target: "subagent", started_at: "2026-04-26T14:21:11Z", status: "complete", inputs_preview: "write a regression test that reproduces the parser crash", outputs_preview: "spawned sub-a2d4", evidence_refs: [{ kind: "message", id: "m17" }] },
+          { crossing_id: "c18", type: "context_compression", label: "context compressed", actor: "agent", target: "next_context", started_at: "2026-04-26T14:25:40Z", status: "complete", inputs_preview: "ctx 88%; 47 messages; 12 tool results pruned", outputs_preview: "summary 2.1KB written; ctx 19%", evidence_refs: [{ kind: "message", id: "m18" }] },
+          { crossing_id: "c19", type: "tool_result", label: "regression: green", actor: "subagent", target: "agent", started_at: "2026-04-26T14:28:06Z", status: "complete", inputs_preview: "", outputs_preview: "subagent confirmed parser crash and regression fix", evidence_refs: [{ kind: "message", id: "m19" }] },
+          { crossing_id: "c20", type: "assistant_response", label: "handoff summary", actor: "agent", target: "you", started_at: "2026-04-26T14:36:19Z", status: "active", inputs_preview: "", outputs_preview: "fix ready; parser now handles nested charge arrays", evidence_refs: [{ kind: "message", id: "m20" }] }
         ],
         "j-2026-04-26-cron-3e91": [
           { crossing_id: "d01", type: "prompt", label: "Cron trigger", actor: "cron", target: "agent_loop", started_at: "2026-04-26T09:00:02Z", status: "complete", inputs_preview: "[cron: ops-digest @ 09:00 UTC]", outputs_preview: "", evidence_refs: [{ kind: "message", id: 21 }] },
@@ -142,9 +271,14 @@
       ];
 
       const guideposts = [
-        { kind: "failure", severity: "warning", title: "Repeated parser failure", detail: "The same webhook parser failed twice before a model switch.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c06" }] },
-        { kind: "delegation", severity: "warning", title: "Subagent timed out", detail: "The schema-drift subagent returned no final result.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c11" }] },
-        { kind: "context", severity: "info", title: "Context compression occurred", detail: "Hermes compressed after the journey crossed 88 percent context.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c12" }] }
+        { kind: "failure", severity: "warning", title: "Repeated parser failure", detail: "The thread doubled back here. Look for the same call attempted again before this crossing.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c08" }] },
+        { kind: "failure", severity: "warning", title: "Tool loop before route change", detail: "Three sandbox attempts failed before the model ferry moved the journey.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c05" }, { kind: "crossing", id: "c10" }] },
+        { kind: "threshold", severity: "notice", title: "Secret redacted in flight", detail: "A live Stripe key was removed from visible evidence before the patch step.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c09" }] },
+        { kind: "model", severity: "info", title: "Model ferry crossed to Claude", detail: "Hermes moved from hermes-4-70b to claude-sonnet-4.5 after repeated tool failure.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c10" }] },
+        { kind: "delegation", severity: "warning", title: "Schema-drift subagent timed out", detail: "The delegated sample reader returned no final result before the parent resumed.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c14" }] },
+        { kind: "approval", severity: "info", title: "Human gate before write", detail: "The journey paused at a write approval before touching parser code.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c12" }] },
+        { kind: "memory", severity: "info", title: "Relevant memory hit", detail: "Prior memory already pointed toward Stripe webhook v2 schema drift.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c02" }] },
+        { kind: "context", severity: "info", title: "Context compression occurred", detail: "Hermes compressed after the journey crossed 88 percent context.", journey_id: "j-2026-04-26-cli-7f2a", evidence_refs: [{ kind: "crossing", id: "c18" }] }
       ];
 
       function detailFor(id) {
