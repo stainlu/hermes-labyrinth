@@ -2327,7 +2327,7 @@
         }
       }, React.createElement(Meta, {
         label: "t",
-        value: j.started_at.split(" ")[1]
+        value: clock(j.started_at)
       }), React.createElement(Meta, {
         label: "dur",
         value: j.duration_label
@@ -3445,7 +3445,7 @@
         label: "User prompt",
         actor: "you",
         target: "agent_loop",
-        t: journey.started_at.split(" ")[1],
+        t: clock(journey.started_at),
         dur: null,
         status: "complete",
         thread: "main",
@@ -3457,7 +3457,7 @@
         label: "memory.search",
         actor: "agent",
         target: "qdrant",
-        t: journey.started_at.split(" ")[1],
+        t: clock(journey.started_at),
         dur: 320,
         status: "complete",
         thread: "tools",
@@ -3469,7 +3469,7 @@
         label: "Assistant",
         actor: "agent",
         target: "you",
-        t: journey.started_at.split(" ")[1],
+        t: clock(journey.started_at),
         dur: null,
         status: journey.status === "failed" ? "failed" : "complete",
         thread: "main",
@@ -4055,7 +4055,7 @@
       id,
       source: j.source || "unknown",
       status: j.status || "unknown",
-      started_at: j.started_at || "unknown",
+      started_at: formatDateTime(j.started_at),
       duration_label: j.duration_label || durationLabel(j.duration_ms),
       duration_ms: j.duration_ms,
       title: j.title || j.summary || j.root_prompt || "Untitled journey",
