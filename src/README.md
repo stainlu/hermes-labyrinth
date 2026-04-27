@@ -21,6 +21,10 @@ The generated `index.html` stamps local plugin assets with a content hash, so
 the canonical Pages URL can stay clean while JS/CSS updates bypass stale CDN or
 browser cache.
 
+Run `npm run smoke` after UI changes. It boots the generated demo in headless
+Chrome and clicks through the primary routes, map modes, search, dataset switch,
+and threshold filter.
+
 The current source is intentionally conservative: it preserves the hackathon UI
 while making the bundle reproducible. The parts are ordered by filename:
 

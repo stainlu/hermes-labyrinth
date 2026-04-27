@@ -6,15 +6,15 @@
 - Keep every visible action either working or clearly read-only.
 - Keep `dashboard/dist` reproducible from `src`.
 - Keep the canonical GitHub Pages URL clean while cache-busting local assets.
-- Add API and frontend smoke tests.
+- Keep browser smoke tests and API fixture tests passing.
 
 ## Next
 
 - Convert `src/parts/*.js` into true ES modules with focused exports/imports.
 - Add backend tests for state-db absence, journey listing, crossing inference,
   redaction, guideposts, and report generation.
-- Add frontend smoke tests for journey selection, guidepost jumps, map modes,
-  reports, empty state, and API failure state.
+- Add full Hermes dashboard integration tests for plugin mounting and real local
+  state.
 
 ## Later
 

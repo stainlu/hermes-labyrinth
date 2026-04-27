@@ -75,6 +75,8 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 │   └── FUNCTIONAL_SPEC.md
 ├── scripts/
 │   ├── build-plugin.mjs     # Builds dashboard/dist from src
+│   ├── smoke-demo.mjs       # Browser smoke test for the public demo
+│   ├── test-plugin-api.py   # Fixture tests for API normalization helpers
 │   └── verify.mjs           # Local verification checks
 ├── src/
 │   ├── demo/                # GitHub Pages demo source
@@ -97,6 +99,7 @@ dashboard plugins and GitHub Pages are loaded directly from built static files.
 ```bash
 npm run build
 npm run check
+npm run smoke
 ```
 
 `npm run check` verifies:
@@ -105,8 +108,13 @@ npm run check
 - the public demo is using cache-busted plugin assets
 - frontend JavaScript parses
 - backend Python parses
+- API normalization helper fixtures pass
 - both static HTML demo artifacts parse
 - the removed `New journey` dead control has not returned
+
+`npm run smoke` starts a local static server, opens the demo in headless Chrome,
+fails on browser/runtime errors, and clicks through the main routes and controls.
+Use `npm run smoke:live` to run the same pass against GitHub Pages.
 
 ## Architecture
 

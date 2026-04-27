@@ -4,7 +4,9 @@ import { readFileSync } from "node:fs";
 const checks = [
   ["node", ["scripts/build-plugin.mjs", "--check"]],
   ["node", ["--check", "dashboard/dist/index.js"]],
+  ["node", ["--check", "scripts/smoke-demo.mjs"]],
   ["python3", ["-m", "py_compile", "dashboard/plugin_api.py"]],
+  ["python3", ["scripts/test-plugin-api.py"]],
   ["python3", ["-m", "html.parser", "index.html"]],
   ["python3", ["-m", "html.parser", "Hermes Labyrinth _standalone_.html"]],
 ];

@@ -28,6 +28,8 @@ more modular frontend source tree.
 - `src/parts/*.js` are ordered browser chunks, not true ES modules yet. They
   should be converted into explicit component, data, normalization, and
   plugin-registration modules.
-- Frontend smoke tests and backend API fixtures are not in place yet.
+- Browser smoke tests cover the demo's main controls and routes, and API helper
+  fixtures cover normalization logic. Full Hermes dashboard integration tests
+  are not in place yet.
 - `Hermes Labyrinth _standalone_.html` is kept as the design/demo artifact and
   should not be treated as maintainable source.

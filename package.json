@@ -6,8 +6,10 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build-plugin.mjs",
-    "check": "node scripts/verify.mjs"
+    "check": "node scripts/verify.mjs",
+    "smoke": "node scripts/smoke-demo.mjs",
+    "smoke:live": "node scripts/smoke-demo.mjs --url=https://stainlu.github.io/hermes-labyrinth/",
+    "test": "npm run check && npm run smoke"
   },
   "license": "MIT"
 }
-
