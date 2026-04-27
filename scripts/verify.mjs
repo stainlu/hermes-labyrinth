@@ -26,4 +26,10 @@ for (const file of ["dashboard/dist/index.js", "index.html", "Hermes Labyrinth _
   }
 }
 
+const indexHtml = readFileSync("index.html", "utf8");
+if (/__bundler\/template|__bundler\/manifest|Error unpacking/.test(indexHtml)) {
+  console.error("packed artifact wrapper found in index.html; use the static demo harness");
+  process.exit(1);
+}
+
 console.log("all checks passed");
