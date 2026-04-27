@@ -31,5 +31,17 @@ if (/__bundler\/template|__bundler\/manifest|Error unpacking/.test(indexHtml)) {
   console.error("packed artifact wrapper found in index.html; use the static demo harness");
   process.exit(1);
 }
+if (/__HERMES_ASSET_VERSION__/.test(indexHtml)) {
+  console.error("unstamped asset version placeholder found in index.html");
+  process.exit(1);
+}
+if (!/dashboard\/dist\/labyrinth\.css\?v=[0-9a-f]{12}/.test(indexHtml)) {
+  console.error("index.html must cache-bust dashboard/dist/labyrinth.css");
+  process.exit(1);
+}
+if (!/dashboard\/dist\/index\.js\?v=[0-9a-f]{12}/.test(indexHtml)) {
+  console.error("index.html must cache-bust dashboard/dist/index.js");
+  process.exit(1);
+}
 
 console.log("all checks passed");

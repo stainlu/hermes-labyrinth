@@ -7,8 +7,8 @@ more modular frontend source tree.
 ## Demo
 
 - The GitHub Pages demo is static and uses mocked Hermes state.
-- The demo is bundled as a standalone HTML artifact so it can run without a
-  Hermes install.
+- The demo is a generated static harness with cache-busted local assets so it
+  can run without a Hermes install.
 - The demo does not create, stop, resume, or mutate journeys.
 
 ## Plugin

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,11 +44,13 @@ function stripBanner(text) {
 }
 
 let dirty = false;
+const generated = new Map();
 
 for (const file of files) {
   const targetPath = resolve(root, file.target);
   const source = await file.read();
   const next = file.banner + stripBanner(source);
+  generated.set(file.target, next);
   let current = "";
   try {
     current = await readFile(targetPath, "utf8");
@@ -66,6 +69,37 @@ for (const file of files) {
   } else if (!checkOnly) {
     console.log(`up to date ${file.target}`);
   }
+}
+
+const assetVersion = createHash("sha256")
+  .update(generated.get("dashboard/dist/index.js"))
+  .update("\0")
+  .update(generated.get("dashboard/dist/labyrinth.css"))
+  .digest("hex")
+  .slice(0, 12);
+
+const demoSource = await readFile(resolve(root, "src/demo/index.html"), "utf8");
+if (!demoSource.includes("__HERMES_ASSET_VERSION__")) {
+  throw new Error("src/demo/index.html is missing __HERMES_ASSET_VERSION__");
+}
+const demoNext = demoSource.replaceAll("__HERMES_ASSET_VERSION__", assetVersion);
+const demoTarget = resolve(root, "index.html");
+let demoCurrent = "";
+try {
+  demoCurrent = await readFile(demoTarget, "utf8");
+} catch {
+  demoCurrent = "";
+}
+if (demoCurrent !== demoNext) {
+  dirty = true;
+  if (checkOnly) {
+    console.error("index.html is out of date. Run npm run build.");
+  } else {
+    await writeFile(demoTarget, demoNext);
+    console.log(`built index.html (${assetVersion})`);
+  }
+} else if (!checkOnly) {
+  console.log(`up to date index.html (${assetVersion})`);
 }
 
 if (checkOnly && dirty) {

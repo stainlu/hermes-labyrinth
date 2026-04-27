@@ -77,11 +77,12 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 │   ├── build-plugin.mjs     # Builds dashboard/dist from src
 │   └── verify.mjs           # Local verification checks
 ├── src/
+│   ├── demo/                # GitHub Pages demo source
 │   ├── parts/               # Ordered frontend source chunks
 │   └── labyrinth.css        # Frontend CSS source
 ├── theme/
 │   └── hermes-labyrinth.yaml
-├── index.html               # Static GitHub Pages demo
+├── index.html               # Generated GitHub Pages demo
 ├── package.json             # Build/check scripts, no runtime deps
 └── Hermes Labyrinth _standalone_.html
 ```
@@ -89,8 +90,9 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 ## Development
 
 `dashboard/dist/` is generated from `src/parts/*.js` and `src/labyrinth.css`.
-It is checked in because Hermes dashboard plugins are loaded directly from
-built static files.
+`index.html` is generated from `src/demo/index.html` with content-hash query
+strings on the local JS/CSS assets. These files are checked in because Hermes
+dashboard plugins and GitHub Pages are loaded directly from built static files.
 
 ```bash
 npm run build
@@ -100,6 +102,7 @@ npm run check
 `npm run check` verifies:
 
 - `dashboard/dist` is up to date with `src`
+- the public demo is using cache-busted plugin assets
 - frontend JavaScript parses
 - backend Python parses
 - both static HTML demo artifacts parse

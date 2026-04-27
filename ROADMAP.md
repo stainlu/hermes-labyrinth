@@ -5,12 +5,12 @@
 - Keep the public demo stable.
 - Keep every visible action either working or clearly read-only.
 - Keep `dashboard/dist` reproducible from `src`.
+- Keep the canonical GitHub Pages URL clean while cache-busting local assets.
 - Add API and frontend smoke tests.
 
 ## Next
 
 - Convert `src/parts/*.js` into true ES modules with focused exports/imports.
-- Replace the standalone GitHub Pages bundle with a normal static demo harness.
 - Add backend tests for state-db absence, journey listing, crossing inference,
   redaction, guideposts, and report generation.
 - Add frontend smoke tests for journey selection, guidepost jumps, map modes,

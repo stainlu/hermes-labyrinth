@@ -1,7 +1,7 @@
 # Frontend Source
 
 `src/parts/*.js` and `src/labyrinth.css` are the source files for the Hermes
-dashboard plugin bundle.
+dashboard plugin bundle. `src/demo/index.html` is the GitHub Pages demo source.
 
 Run:
 
@@ -14,7 +14,12 @@ This writes:
 ```text
 dashboard/dist/index.js
 dashboard/dist/labyrinth.css
+index.html
 ```
+
+The generated `index.html` stamps local plugin assets with a content hash, so
+the canonical Pages URL can stay clean while JS/CSS updates bypass stale CDN or
+browser cache.
 
 The current source is intentionally conservative: it preserves the hackathon UI
 while making the bundle reproducible. The parts are ordered by filename:
