@@ -1,0 +1,29 @@
+name: Feature request
+description: Propose a useful extension to Hermes Labyrinth.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What agent-observability problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should Hermes Labyrinth do?
+    validations:
+      required: true
+  - type: textarea
+    id: data
+    attributes:
+      label: Data Source
+      description: Which Hermes state, logs, or plugin API data should power it?
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints
+      description: Privacy, redaction, performance, or read-only concerns.

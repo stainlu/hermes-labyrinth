@@ -1,25 +1,33 @@
 # Hermes Labyrinth
 
-Where the agent has been.
+[![Live demo](https://img.shields.io/badge/demo-live-f0ede4?style=flat-square)](https://stainlu.github.io/hermes-labyrinth/)
+[![Release](https://img.shields.io/github/v/release/stainlu/hermes-labyrinth?style=flat-square)](https://github.com/stainlu/hermes-labyrinth/releases)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE)
+[![Smoke tested](https://img.shields.io/badge/smoke-tested-3a6a3a?style=flat-square)](#verification)
+[![Hermes Agent](https://img.shields.io/badge/Hermes-Agent-14130f?style=flat-square)](https://github.com/NousResearch/hermes-agent)
 
-Hermes Labyrinth is a read-only observability plugin for
-[Hermes Agent](https://github.com/NousResearch/hermes-agent). It turns agent
-activity into a map of crossings: prompts, tool calls, tool results, failures,
-model switches, subagents, approvals, memory hits, redactions, context
-compression, cron runs, and reportable evidence.
+Read-only observability for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
 
-It is not a chat UI. It is a blackbox recorder for autonomous work.
+Hermes Labyrinth turns autonomous work into a map of crossings: prompts, tool
+calls, tool results, failures, model switches, subagents, approvals, memory
+hits, redactions, context compression, cron runs, and exportable evidence.
+
+It is not a chat UI. It is a black-box recorder for agents moving through
+unknown work.
+
+![Hermes Labyrinth dashboard screenshot](./screenshot.png)
 
 ## Demo
 
 - Live demo: https://stainlu.github.io/hermes-labyrinth/
-- Repo: https://github.com/stainlu/hermes-labyrinth
+- Current release: [`v0.1.0`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.0)
+- Hermes Agent: https://github.com/NousResearch/hermes-agent
 
 The public demo is static and uses mocked Hermes state so it can run on GitHub
-Pages. The installable dashboard plugin reads local Hermes state through its
-FastAPI plugin routes.
+Pages. The installable dashboard plugin reads local Hermes state through Hermes
+dashboard plugin routes.
 
-## What it does
+## Highlights
 
 - **Journey index**: recent CLI, dashboard, gateway, cron, and delegated work.
 - **Labyrinth map**: ordered crossings through a selected agent journey.
@@ -61,6 +69,51 @@ mkdir -p ~/.hermes/dashboard-themes
 cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dashboard-themes/
 ```
 
+## Data Policy
+
+Hermes Labyrinth is read-only by design.
+
+- It does not start, stop, resume, mutate, or create Hermes sessions.
+- Secret redaction is applied to previews and reports.
+- Unknown fields stay unknown.
+- Reports are generated from local Hermes state.
+- The public demo uses sample data and should not be treated as live telemetry.
+
+## Verification
+
+```bash
+npm test
+```
+
+`npm test` runs:
+
+- reproducible build checks for `dashboard/dist` and `index.html`
+- frontend JavaScript parse checks
+- backend Python parse checks
+- API normalization fixture tests
+- packed-artifact and dead-control regressions
+- headless Chrome smoke coverage for map modes, route changes, search,
+  dataset switching, and the threshold filter
+
+To smoke-test the deployed Pages build:
+
+```bash
+npm run smoke:live
+```
+
+## Development
+
+```bash
+npm run build
+npm run check
+npm run smoke
+```
+
+`dashboard/dist/` is generated from `src/parts/*.js` and `src/labyrinth.css`.
+`index.html` is generated from `src/demo/index.html` with content-hash query
+strings on the local JS/CSS assets. These files are checked in because Hermes
+dashboard plugins and GitHub Pages are loaded directly from built static files.
+
 ## Repository Layout
 
 ```text
@@ -74,7 +127,7 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 │   ├── DESIGN_BRIEF.md
 │   └── FUNCTIONAL_SPEC.md
 ├── scripts/
-│   ├── build-plugin.mjs     # Builds dashboard/dist from src
+│   ├── build-plugin.mjs     # Builds dashboard/dist and index.html from src
 │   ├── smoke-demo.mjs       # Browser smoke test for the public demo
 │   ├── test-plugin-api.py   # Fixture tests for API normalization helpers
 │   └── verify.mjs           # Local verification checks
@@ -85,36 +138,9 @@ cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dash
 ├── theme/
 │   └── hermes-labyrinth.yaml
 ├── index.html               # Generated GitHub Pages demo
-├── package.json             # Build/check scripts, no runtime deps
-└── Hermes Labyrinth _standalone_.html
+├── screenshot.png           # README screenshot
+└── package.json             # Build/check/smoke scripts
 ```
-
-## Development
-
-`dashboard/dist/` is generated from `src/parts/*.js` and `src/labyrinth.css`.
-`index.html` is generated from `src/demo/index.html` with content-hash query
-strings on the local JS/CSS assets. These files are checked in because Hermes
-dashboard plugins and GitHub Pages are loaded directly from built static files.
-
-```bash
-npm run build
-npm run check
-npm run smoke
-```
-
-`npm run check` verifies:
-
-- `dashboard/dist` is up to date with `src`
-- the public demo is using cache-busted plugin assets
-- frontend JavaScript parses
-- backend Python parses
-- API normalization helper fixtures pass
-- both static HTML demo artifacts parse
-- the removed `New journey` dead control has not returned
-
-`npm run smoke` starts a local static server, opens the demo in headless Chrome,
-fails on browser/runtime errors, and clicks through the main routes and controls.
-Use `npm run smoke:live` to run the same pass against GitHub Pages.
 
 ## Architecture
 
@@ -135,9 +161,6 @@ dashboard/dist/*
 Hermes dashboard tab: Labyrinth
 ```
 
-The plugin is read-only. It does not start, stop, mutate, or create Hermes
-sessions.
-
 ## API Surface
 
 ```text
@@ -152,15 +175,12 @@ GET /api/plugins/hermes-labyrinth/reports/{journey_id}.json
 GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
 ```
 
-## Data Policy
+## Project Status
 
-- Read-only by design.
-- Secret redaction is applied to previews and reports.
-- Unknown fields stay unknown.
-- Reports are generated from local Hermes state.
-- The public demo uses sample data and should not be treated as live telemetry.
+`v0.1.0` is a hackathon preview that is stable enough to demo and install as a
+read-only dashboard plugin. The public demo and main UI flows are covered by
+browser smoke tests; full Hermes dashboard integration tests are still on the
+roadmap.
 
-## Status
-
-Hackathon build, moving toward production readiness. See
-[Known Limitations](./KNOWN_LIMITATIONS.md) and [Roadmap](./ROADMAP.md).
+See [Known Limitations](./KNOWN_LIMITATIONS.md), [Roadmap](./ROADMAP.md), and
+[Changelog](./CHANGELOG.md).

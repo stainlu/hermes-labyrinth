@@ -7,6 +7,7 @@
 - Keep `dashboard/dist` reproducible from `src`.
 - Keep the canonical GitHub Pages URL clean while cache-busting local assets.
 - Keep browser smoke tests and API fixture tests passing.
+- Maintain `v0.1.x` as the installable hackathon preview line.
 
 ## Next
 
@@ -23,4 +24,5 @@
 - Build richer model-ferry views for provider/model transitions.
 - Add a subagent tree with parent/child journey navigation.
 - Add optional hook recording for precise tool durations and boundary events.
-- Cut a tagged `v0.1.0` release once source, build, and tests are in place.
+- Cut `v0.2.0` once source modules and Hermes dashboard integration tests are
+  in place.
