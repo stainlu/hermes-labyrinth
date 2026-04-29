@@ -2327,7 +2327,7 @@
         }
       }, React.createElement(Meta, {
         label: "t",
-        value: j.started_at.split(" ")[1]
+        value: clock(j.started_at)
       }), React.createElement(Meta, {
         label: "dur",
         value: j.duration_label
