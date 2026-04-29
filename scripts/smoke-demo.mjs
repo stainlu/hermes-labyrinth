@@ -224,7 +224,7 @@ async function launchChrome(url) {
   const version = await waitFor(
     () => fetchJson(`http://127.0.0.1:${remotePort}/json/version`).catch(() => null),
     "Chrome DevTools endpoint",
-    12000,
+    30000,
     200,
   );
   const tabs = await fetchJson(`http://127.0.0.1:${remotePort}/json/list`);
