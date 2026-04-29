@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const checks = [
+  ["node", ["scripts/test-normalize-api.mjs"]],
   ["node", ["scripts/build-plugin.mjs", "--check"]],
   ["node", ["--check", "dashboard/dist/index.js"]],
   ["node", ["--check", "scripts/smoke-demo.mjs"]],

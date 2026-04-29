@@ -90,7 +90,7 @@ npm test
 - reproducible build checks for `dashboard/dist` and `index.html`
 - frontend JavaScript parse checks
 - backend Python parse checks
-- API normalization fixture tests
+- API normalization fixture tests, including numeric Hermes timestamps
 - packed-artifact and dead-control regressions
 - headless Chrome smoke coverage for map modes, route changes, search,
   dataset switching, and the threshold filter
