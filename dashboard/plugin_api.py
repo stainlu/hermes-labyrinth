@@ -756,6 +756,42 @@ async def skills():
     return _load_skill_inventory()
 
 
+@router.get("/skills/ema")
+async def skills_ema(window_days: int = 14, alpha: float = 0.3):
+    """Per-(skill_name, model) exponentially-weighted moving averages.
+
+    Thin wrapper over ``hermes_state.SessionDB.query_skill_ema(...)``.
+    Requires hermes-agent ≥ schema v12 (PR
+    `NousResearch/hermes-agent#19508`). On older installs (no
+    ``skill_invocations`` table or no ``query_skill_ema`` method) we
+    return ``[]`` so the dashboard renders an empty panel rather than
+    500ing.
+
+    Query params:
+      - ``window_days`` (default 14) — calendar-day window
+      - ``alpha`` (default 0.3) — exponential smoothing factor.
+        ``α=0.3`` ≈ 1.94-day half-life. Use ``α≈0.129`` for a true
+        5-day half-life. ``0 < alpha < 1``.
+
+    Returns a JSON list of dicts. See ``query_skill_ema`` docstring
+    for field semantics.
+    """
+    if not _state_db_exists():
+        return []
+    try:
+        db = _db()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"state.db unavailable: {e}")
+    query = getattr(db, "query_skill_ema", None)
+    if not callable(query):
+        # hermes-agent older than PR #19508 — graceful empty response.
+        return []
+    try:
+        return query(window_days=window_days, alpha=alpha)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"query_skill_ema failed: {e}")
+
+
 @router.get("/cron")
 async def cron():
     return _cron_inventory()
