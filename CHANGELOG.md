@@ -2,7 +2,7 @@
 
 All notable changes to Hermes Labyrinth are documented here.
 
-## Unreleased
+## v0.1.1 - 2026-05-04
 
 ### Changed
 

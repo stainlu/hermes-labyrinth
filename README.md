@@ -1,7 +1,7 @@
 # Hermes Labyrinth
 
 [![Live demo](https://img.shields.io/badge/demo-live-f0ede4?style=flat-square)](https://stainlu.github.io/hermes-labyrinth/)
-[![Release](https://img.shields.io/github/v/release/stainlu/hermes-labyrinth?style=flat-square)](https://github.com/stainlu/hermes-labyrinth/releases)
+[![Version](https://img.shields.io/github/v/tag/stainlu/hermes-labyrinth?style=flat-square)](https://github.com/stainlu/hermes-labyrinth/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](./LICENSE)
 [![Smoke tested](https://img.shields.io/badge/smoke-tested-3a6a3a?style=flat-square)](#verification)
 [![Hermes Agent](https://img.shields.io/badge/Hermes-Agent-14130f?style=flat-square)](https://github.com/NousResearch/hermes-agent)
@@ -20,7 +20,7 @@ unknown work.
 ## Demo
 
 - Live demo: https://stainlu.github.io/hermes-labyrinth/
-- Current release: [`v0.1.0`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.0)
+- Current release: [`v0.1.1`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.1)
 - Hermes Agent: https://github.com/NousResearch/hermes-agent
 
 The public demo is static and uses mocked Hermes state so it can run on GitHub
@@ -216,7 +216,7 @@ GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
 
 ## Project Status
 
-`v0.1.0` is a hackathon preview that is stable enough to demo and install as a
+`v0.1.1` is a hackathon preview that is stable enough to demo and install as a
 read-only dashboard plugin. The public demo and main UI flows are covered by
 browser smoke tests; full Hermes dashboard integration tests are still on the
 roadmap.
