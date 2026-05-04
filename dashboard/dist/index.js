@@ -4181,8 +4181,32 @@
       cleanJourneyId: SAMPLE_DATA.journeys[1].id
     });
   }
+  const API_NOT_MOUNTED_MESSAGE = "Labyrinth backend API is not mounted. Restart the Hermes dashboard after installing or updating the plugin, then check dashboard startup logs for plugin API import errors.";
+  function describeApiError(err) {
+    const message = err && err.message ? err.message : String(err);
+    if (/Unexpected token '<'|not valid JSON|<!doctype|<html/i.test(message)) {
+      return API_NOT_MOUNTED_MESSAGE;
+    }
+    if (/404|Plugin not found|File not found/i.test(message)) {
+      return "Labyrinth plugin assets or API routes were not found. Confirm the plugin is installed under ~/.hermes/plugins/hermes-labyrinth and restart the Hermes dashboard.";
+    }
+    return message;
+  }
   function fetchJSON(url) {
-    return SDK.fetchJSON ? SDK.fetchJSON(url) : fetch(url).then(r => r.json());
+    const request = SDK.fetchJSON ? SDK.fetchJSON(url) : fetch(url).then(async r => {
+      const contentType = r.headers.get("content-type") || "";
+      const text = await r.text();
+      if (!r.ok) {
+        throw new Error(r.status + ": " + text);
+      }
+      if (!/json/i.test(contentType) && /^\s*</.test(text)) {
+        throw new Error("HTML returned for JSON endpoint: " + text.slice(0, 80));
+      }
+      return JSON.parse(text);
+    });
+    return request.catch(err => {
+      throw new Error(describeApiError(err));
+    });
   }
   function loadApiData() {
     return Promise.all([fetchJSON(API + "/journeys?limit=40&include_children=true"), fetchJSON(API + "/skills"), fetchJSON(API + "/cron"), fetchJSON(API + "/guideposts?limit=40")]).then(async ([journeyRes, skillRes, cronRes, guideRes]) => {
@@ -4223,11 +4247,25 @@
       style: {
         display: "grid",
         placeItems: "center",
-        height: "100vh"
+        minHeight: "100vh",
+        padding: 24,
+        textAlign: "center"
+      }
+    }, React.createElement("div", {
+      style: {
+        maxWidth: 680
       }
     }, React.createElement("div", {
       className: "eyebrow"
-    }, error || "Loading Labyrinth"));
+    }, error ? "Labyrinth cannot read Hermes state" : "Loading Labyrinth"), error && React.createElement("p", {
+      style: {
+        marginTop: 12,
+        color: "var(--ink-2)",
+        fontFamily: "var(--font-mono)",
+        fontSize: 12,
+        lineHeight: 1.6
+      }
+    }, error)));
     return React.createElement(LabyrinthExperience, {
       data
     });

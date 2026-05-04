@@ -10,10 +10,10 @@ const loadApiHelpers = new Function(
   "SDK",
   "API",
   `${normalizeSource}
-return { normalizeJourney, normalizeData, clock };`,
+return { normalizeJourney, normalizeData, clock, describeApiError };`,
 );
 
-const { normalizeJourney, normalizeData, clock } = loadApiHelpers(
+const { normalizeJourney, normalizeData, clock, describeApiError } = loadApiHelpers(
   { journeys: [], debugCrossings: [], cleanCrossings: [], guideposts: [], skills: [], cron: [] },
   {},
   "/api/plugins/hermes-labyrinth",
@@ -50,6 +50,16 @@ assert.equal(
 assert.equal(clock(timestampSeconds), "00:00:00", "clock should handle raw Unix-second timestamps");
 assert.equal(clock("2026-04-28T14:25:30Z"), "14:25:30", "clock should handle ISO timestamps");
 assert.equal(clock(null), "unknown", "clock should handle missing timestamps");
+assert.match(
+  describeApiError(new SyntaxError("Unexpected token '<', \"<!doctype \"... is not valid JSON")),
+  /backend API is not mounted/,
+  "HTML SPA fallback should produce an actionable backend-not-mounted diagnostic",
+);
+assert.match(
+  describeApiError(new Error("404: Plugin not found")),
+  /plugin assets or API routes were not found/,
+  "missing plugin assets should produce an actionable install diagnostic",
+);
 
 const normalizedData = normalizeData({
   journeys: [{ journey_id: "journey-2", started_at: timestampSeconds, status: "active" }],

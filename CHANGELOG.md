@@ -2,6 +2,19 @@
 
 All notable changes to Hermes Labyrinth are documented here.
 
+## v0.1.2 - 2026-05-04
+
+### Changed
+
+- Labyrinth now turns HTML/SPA fallback API responses into an actionable
+  backend-not-mounted diagnostic instead of surfacing raw JSON parser errors.
+- Install docs now clarify that dashboard rescans refresh frontend discovery,
+  while Python plugin API routes require a full dashboard restart.
+
+### Added
+
+- Regression coverage for plugin API fallback diagnostics.
+
 ## v0.1.1 - 2026-05-04
 
 ### Changed

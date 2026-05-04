@@ -20,7 +20,7 @@ unknown work.
 ## Demo
 
 - Live demo: https://stainlu.github.io/hermes-labyrinth/
-- Current release: [`v0.1.1`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.1)
+- Current release: [`v0.1.2`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.2)
 - Hermes Agent: https://github.com/NousResearch/hermes-agent
 
 The public demo is static and uses mocked Hermes state so it can run on GitHub
@@ -48,13 +48,20 @@ mkdir -p ~/.hermes/plugins
 git clone https://github.com/stainlu/hermes-labyrinth.git ~/.hermes/plugins/hermes-labyrinth
 ```
 
-Start or restart the dashboard:
+Start the dashboard after installing:
 
 ```bash
 hermes dashboard
 ```
 
-If the dashboard is already running, rescan plugins:
+If the dashboard was already running, fully stop and restart it after a first
+install or after updating `dashboard/plugin_api.py`. The frontend plugin list
+can be rescanned, but Python API routes are mounted during dashboard startup.
+If the Labyrinth tab shows a backend/API diagnostic, restart the dashboard and
+check the dashboard startup logs for plugin API import errors.
+
+Rescan is only for refreshing discovered frontend manifests/assets in the
+current dashboard process:
 
 ```bash
 curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
@@ -105,6 +112,9 @@ hermes plugins disable hermes-labyrinth
 rm -rf ~/.hermes/plugins/hermes-labyrinth
 curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
 ```
+
+Use a full dashboard restart when rollback or update changes Python API files;
+rescan alone cannot unmount or remount FastAPI routes in the current process.
 
 ## Data Policy
 
@@ -216,7 +226,7 @@ GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
 
 ## Project Status
 
-`v0.1.1` is a hackathon preview that is stable enough to demo and install as a
+`v0.1.2` is a hackathon preview that is stable enough to demo and install as a
 read-only dashboard plugin. The public demo and main UI flows are covered by
 browser smoke tests; full Hermes dashboard integration tests are still on the
 roadmap.

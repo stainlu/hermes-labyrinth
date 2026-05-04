@@ -19,11 +19,25 @@
       style: {
         display: "grid",
         placeItems: "center",
-        height: "100vh"
+        minHeight: "100vh",
+        padding: 24,
+        textAlign: "center"
+      }
+    }, React.createElement("div", {
+      style: {
+        maxWidth: 680
       }
     }, React.createElement("div", {
       className: "eyebrow"
-    }, error || "Loading Labyrinth"));
+    }, error ? "Labyrinth cannot read Hermes state" : "Loading Labyrinth"), error && React.createElement("p", {
+      style: {
+        marginTop: 12,
+        color: "var(--ink-2)",
+        fontFamily: "var(--font-mono)",
+        fontSize: 12,
+        lineHeight: 1.6
+      }
+    }, error)));
     return React.createElement(LabyrinthExperience, {
       data
     });

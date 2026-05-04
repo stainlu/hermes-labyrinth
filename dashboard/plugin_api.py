@@ -22,7 +22,7 @@ from hermes_constants import get_hermes_home
 
 router = APIRouter()
 
-PLUGIN_VERSION = "0.1.1"
+PLUGIN_VERSION = "0.1.2"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PREVIEW_LIMIT = 360
 LONG_TOOL_SECONDS = 45
