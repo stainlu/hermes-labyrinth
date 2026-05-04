@@ -14,6 +14,10 @@ more modular frontend source tree.
 ## Plugin
 
 - The plugin API is read-only.
+- Redaction delegates to Hermes core. If Hermes core redaction is unavailable,
+  Labyrinth fails closed by replacing trace text with `[redaction unavailable]`.
+  Pattern coverage still depends on Hermes core redaction, so operators should
+  run a dummy-secret smoke test before production use.
 - Crossings are inferred from existing Hermes session messages. Some durations,
   model switches, tool timings, and subagent links depend on what Hermes has
   recorded in local state.

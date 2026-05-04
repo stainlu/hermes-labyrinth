@@ -67,6 +67,22 @@ def assert_true(value, label: str) -> None:
         raise AssertionError(label)
 
 
+def install_redactor(fn=None) -> None:
+    agent = types.ModuleType("agent")
+    redact = types.ModuleType("agent.redact")
+    if fn is None:
+        fn = lambda text: text.replace("sk_live_test_secret", "[REDACTED]")
+    redact.redact_sensitive_text = fn
+    agent.redact = redact
+    sys.modules["agent"] = agent
+    sys.modules["agent.redact"] = redact
+
+
+def remove_redactor() -> None:
+    sys.modules.pop("agent.redact", None)
+    sys.modules.pop("agent", None)
+
+
 def main() -> None:
     api = load_plugin_api()
 
@@ -77,6 +93,33 @@ def main() -> None:
     health = asyncio.run(api.health())
     assert_equal(health["plugin"], "hermes-labyrinth", "health plugin id")
     assert_equal(health["state_db_exists"], False, "health state db")
+
+    remove_redactor()
+    unavailable = api._preview("token sk_live_test_secret")
+    assert_equal(unavailable, api.REDACTION_UNAVAILABLE, "redaction import failure closes preview")
+    assert_true("sk_live_test_secret" not in unavailable, "redaction import failure does not leak")
+
+    install_redactor()
+    redacted = api._preview("token sk_live_test_secret")
+    assert_true("[REDACTED]" in redacted, "core redactor is applied")
+    assert_true("sk_live_test_secret" not in redacted, "core redactor hides secret")
+
+    install_redactor(lambda _text: (_ for _ in ()).throw(RuntimeError("redactor failed")))
+    failed_closed = api._preview("token sk_live_test_secret")
+    assert_equal(failed_closed, api.REDACTION_UNAVAILABLE, "redactor exception closes preview")
+    assert_true("sk_live_test_secret" not in failed_closed, "redactor exception does not leak")
+
+    install_redactor()
+    redacted_journey = api._journey_from_session({
+        "id": "j-secret",
+        "source": "cli",
+        "started_at": 1000,
+        "last_active": 1001,
+        "title": "debug sk_live_test_secret",
+        "preview": "prompt sk_live_test_secret",
+    })
+    assert_true("sk_live_test_secret" not in redacted_journey["summary"], "journey summary is redacted")
+    assert_true("sk_live_test_secret" not in redacted_journey["root_prompt"], "journey prompt is redacted")
 
     user_crossings = api._message_to_crossings("j1", {
         "id": 1,

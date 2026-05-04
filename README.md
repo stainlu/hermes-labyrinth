@@ -69,12 +69,51 @@ mkdir -p ~/.hermes/dashboard-themes
 cp ~/.hermes/plugins/hermes-labyrinth/theme/hermes-labyrinth.yaml ~/.hermes/dashboard-themes/
 ```
 
+## Safe Docker PoC
+
+For Docker-based Hermes installs, test Labyrinth against a dedicated Hermes
+home first. Do not mount a production profile with live provider, OAuth,
+webhook, Discord, Telegram, or deployment tokens until the redaction smoke test
+below passes.
+
+Pin a known commit instead of tracking `main` blindly:
+
+```bash
+mkdir -p ~/.hermes/plugins
+git clone https://github.com/stainlu/hermes-labyrinth.git ~/.hermes/plugins/hermes-labyrinth
+cd ~/.hermes/plugins/hermes-labyrinth
+git checkout <reviewed-tag-or-commit>
+```
+
+Mount the host Hermes home into the dashboard container using the same path the
+dashboard expects for user plugins. Keep the dashboard bound to localhost or a
+private network while evaluating trace data.
+
+Before production use:
+
+- create a test journey containing dummy API keys, webhook secrets, OAuth
+  tokens, and tool outputs
+- inspect the Labyrinth UI
+- inspect `/reports/<journey_id>.json`
+- inspect `/reports/<journey_id>.md`
+- confirm dummy secrets are absent from every surface
+
+Rollback is just plugin disable/remove plus a dashboard restart or rescan:
+
+```bash
+hermes plugins disable hermes-labyrinth
+rm -rf ~/.hermes/plugins/hermes-labyrinth
+curl http://127.0.0.1:9119/api/dashboard/plugins/rescan
+```
+
 ## Data Policy
 
 Hermes Labyrinth is read-only by design.
 
 - It does not start, stop, resume, mutate, or create Hermes sessions.
-- Secret redaction is applied to previews and reports.
+- Secret redaction is applied to journey summaries, previews, and reports.
+- If the Hermes core redactor cannot be loaded or throws, Labyrinth fails
+  closed and shows `[redaction unavailable]` instead of raw trace text.
 - Unknown fields stay unknown.
 - Reports are generated from local Hermes state.
 - The public demo uses sample data and should not be treated as live telemetry.

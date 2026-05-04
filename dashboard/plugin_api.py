@@ -27,6 +27,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PREVIEW_LIMIT = 360
 LONG_TOOL_SECONDS = 45
 LONG_JOURNEY_SECONDS = 30 * 60
+REDACTION_UNAVAILABLE = "[redaction unavailable]"
 
 
 def _now() -> float:
@@ -35,13 +36,14 @@ def _now() -> float:
 
 def _redact(value: Any) -> str:
     text = value if isinstance(value, str) else json.dumps(value, ensure_ascii=True, default=str)
+    if not text:
+        return ""
     try:
         from agent.redact import redact_sensitive_text
 
-        text = redact_sensitive_text(text)
+        return redact_sensitive_text(text)
     except Exception:
-        pass
-    return text
+        return REDACTION_UNAVAILABLE
 
 
 def _preview(value: Any, limit: int = PREVIEW_LIMIT) -> str:
@@ -96,6 +98,8 @@ def _journey_from_session(session: Dict[str, Any]) -> Dict[str, Any]:
     if isinstance(started, (int, float)):
         end_value = ended if isinstance(ended, (int, float)) else session.get("last_active") or _now()
         duration_ms = max(0, int((float(end_value) - float(started)) * 1000))
+    summary = session.get("title") or session.get("preview") or ""
+    root_prompt = session.get("preview") or ""
     return {
         "journey_id": session.get("id"),
         "source": session.get("source") or "unknown",
@@ -104,8 +108,8 @@ def _journey_from_session(session: Dict[str, Any]) -> Dict[str, Any]:
         "ended_at": ended,
         "last_active": session.get("last_active") or started,
         "duration_ms": duration_ms,
-        "summary": session.get("title") or session.get("preview") or "",
-        "root_prompt": session.get("preview") or "",
+        "summary": _preview(summary),
+        "root_prompt": _preview(root_prompt),
         "parent_journey_id": session.get("parent_session_id"),
         "model_sequence": [session.get("model")] if session.get("model") else [],
         "model": session.get("model"),

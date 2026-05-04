@@ -2,6 +2,22 @@
 
 All notable changes to Hermes Labyrinth are documented here.
 
+## Unreleased
+
+### Changed
+
+- Redaction now fails closed with `[redaction unavailable]` if Hermes core
+  redaction cannot be loaded or raises an error.
+- Journey summaries and root prompts now use the same redaction path as
+  crossing previews and reports.
+- Security and install docs now include Docker PoC, pinned-version, rollback,
+  and redaction smoke-test guidance.
+
+### Added
+
+- Regression coverage for redaction import failures, redactor exceptions, and
+  journey metadata redaction.
+
 ## v0.1.0 - 2026-04-29
 
 First public hackathon release.
