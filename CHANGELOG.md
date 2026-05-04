@@ -2,6 +2,23 @@
 
 All notable changes to Hermes Labyrinth are documented here.
 
+## v0.1.3 - 2026-05-04
+
+### Changed
+
+- Skill inventory now resolves the Hermes source root from the installed
+  `hermes_cli` package instead of the Labyrinth plugin path, fixing source
+  attribution when installed under `~/.hermes/plugins/hermes-labyrinth`.
+- `/skills` now separates effective skills, expected shadowed overrides, true
+  duplicates, and scan errors.
+- User-over-bundled skill overrides are reported as `shadowed` instead of
+  noisy `duplicates`.
+
+### Added
+
+- Regression coverage for user-over-bundled shadowing, same-root duplicates,
+  optional skills, external skills, and disabled skill inventory.
+
 ## v0.1.2 - 2026-05-04
 
 ### Changed

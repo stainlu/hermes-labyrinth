@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import asyncio
 import importlib.util
+import os
 import sys
 import tempfile
 import types
@@ -42,9 +43,14 @@ def install_stubs() -> None:
     responses.PlainTextResponse = PlainTextResponse
     constants = types.ModuleType("hermes_constants")
     constants.get_hermes_home = lambda: TEMP_HOME
+    constants.get_skills_dir = lambda: TEMP_HOME / "skills"
+    constants.get_optional_skills_dir = lambda default=None: Path(default) if default is not None else TEMP_HOME / "optional-skills"
+    hermes_cli = types.ModuleType("hermes_cli")
+    hermes_cli.__file__ = str(TEMP_HOME / "hermes-source" / "hermes_cli" / "__init__.py")
     sys.modules["fastapi"] = fastapi
     sys.modules["fastapi.responses"] = responses
     sys.modules["hermes_constants"] = constants
+    sys.modules["hermes_cli"] = hermes_cli
 
 
 def load_plugin_api():
@@ -83,8 +89,53 @@ def remove_redactor() -> None:
     sys.modules.pop("agent", None)
 
 
+def install_skill_utils(external_dirs=None, disabled=None) -> None:
+    agent = sys.modules.get("agent") or types.ModuleType("agent")
+    skill_utils = types.ModuleType("agent.skill_utils")
+
+    def iter_skill_index_files(skills_dir: Path, filename: str):
+        matches = sorted(Path(skills_dir).rglob(filename), key=lambda p: str(p.relative_to(skills_dir)))
+        for path in matches:
+            yield path
+
+    def parse_frontmatter(content: str):
+        frontmatter = {}
+        body = content
+        if content.startswith("---"):
+            end = content.find("\n---", 3)
+            if end != -1:
+                raw = content[3:end].strip()
+                body = content[end + 4 :]
+                for line in raw.splitlines():
+                    if ":" not in line:
+                        continue
+                    key, value = line.split(":", 1)
+                    frontmatter[key.strip()] = value.strip().strip("'\"")
+        return frontmatter, body
+
+    skill_utils.get_disabled_skill_names = lambda: set(disabled or [])
+    skill_utils.get_external_skills_dirs = lambda: list(external_dirs or [])
+    skill_utils.iter_skill_index_files = iter_skill_index_files
+    skill_utils.parse_frontmatter = parse_frontmatter
+    skill_utils.skill_matches_platform = lambda _frontmatter: True
+    agent.skill_utils = skill_utils
+    sys.modules["agent"] = agent
+    sys.modules["agent.skill_utils"] = skill_utils
+
+
+def write_skill(root: Path, rel: str, *, name: str, description: str, body: str = "") -> Path:
+    path = root / rel / "SKILL.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        f"---\nname: {name}\ndescription: {description}\n---\n{body or description}\n",
+        encoding="utf-8",
+    )
+    return path
+
+
 def main() -> None:
     api = load_plugin_api()
+    os.environ.pop("HERMES_PYTHON_SRC_ROOT", None)
 
     journeys = api._list_journeys()
     assert_equal(journeys["journeys"], [], "missing state db journeys")
@@ -173,6 +224,29 @@ def main() -> None:
     assert_true(any("Long journey" in title for title in titles), "long journey guidepost")
     assert_true(any("High tool-call" in title for title in titles), "tool-call guidepost")
     assert_true(any("Repeated failing tool" in title for title in titles), "loop guidepost")
+
+    source_root = TEMP_HOME / "hermes-source"
+    user_root = TEMP_HOME / "skills"
+    bundled_root = source_root / "skills"
+    optional_root = source_root / "optional-skills"
+    external_root = TEMP_HOME / "external-skills"
+    write_skill(user_root, "autonomous/codex", name="codex", description="User override")
+    write_skill(bundled_root, "autonomous/codex", name="codex", description="Bundled default")
+    write_skill(user_root, "dups/one", name="same-root", description="First duplicate")
+    write_skill(user_root, "dups/two", name="same-root", description="Second duplicate")
+    write_skill(optional_root, "review/code-review", name="code-review", description="Optional review")
+    write_skill(external_root, "factory/skill-factory", name="skill-factory", description="External factory")
+    write_skill(user_root, "disabled/quiet", name="disabled-one", description="Disabled skill")
+    install_skill_utils(external_dirs=[external_root], disabled={"disabled-one"})
+    inventory = api._load_skill_inventory()
+    by_name = {item["name"]: item for item in inventory["skills"]}
+    assert_equal(by_name["codex"]["source"], "user", "user skill shadows bundled skill")
+    assert_equal(by_name["code-review"]["source"], "optional", "optional skill source")
+    assert_equal(by_name["skill-factory"]["source"], "external", "external skill source")
+    assert_equal(by_name["disabled-one"]["enabled"], False, "disabled skill remains listed")
+    assert_true(any(item["name"] == "codex" and item["source"] == "bundled" for item in inventory["shadowed"]), "bundled skill is shadowed, not duplicated")
+    assert_true(any(item["name"] == "same-root" for item in inventory["duplicates"]), "same-root name collision is a duplicate")
+    assert_true(all(item["name"] != "codex" for item in inventory["duplicates"]), "shadowed overrides are excluded from duplicates")
 
     print("plugin api tests passed")
 

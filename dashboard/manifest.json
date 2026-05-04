@@ -3,7 +3,7 @@
   "label": "Labyrinth",
   "description": "Journey, crossing, skill, cron, and guidepost observability for Hermes Agent.",
   "icon": "Activity",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "tab": {
     "path": "/labyrinth",
     "position": "after:sessions"

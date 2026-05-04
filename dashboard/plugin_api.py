@@ -9,6 +9,8 @@ journeys, crossings, guideposts, skills, cron gates, and exportable reports.
 from __future__ import annotations
 
 import json
+import hashlib
+import os
 import re
 import time
 from collections import Counter, defaultdict
@@ -22,7 +24,7 @@ from hermes_constants import get_hermes_home
 
 router = APIRouter()
 
-PLUGIN_VERSION = "0.1.2"
+PLUGIN_VERSION = "0.1.3"
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 PREVIEW_LIMIT = 360
 LONG_TOOL_SECONDS = 45
@@ -75,6 +77,25 @@ def _db():
 
 def _state_db_exists() -> bool:
     return (get_hermes_home() / "state.db").exists()
+
+
+def _hermes_source_root() -> Path:
+    override = os.getenv("HERMES_PYTHON_SRC_ROOT", "").strip()
+    if override:
+        return Path(override)
+    try:
+        import hermes_cli
+
+        return Path(hermes_cli.__file__).resolve().parent.parent
+    except Exception:
+        return PROJECT_ROOT
+
+
+def _resolved_path(path: Path) -> Path:
+    try:
+        return path.resolve()
+    except Exception:
+        return path.absolute()
 
 
 def _status_from_session(session: Dict[str, Any]) -> str:
@@ -492,33 +513,42 @@ def _load_skill_inventory() -> Dict[str, Any]:
     )
     from hermes_constants import get_optional_skills_dir, get_skills_dir
 
-    roots = [
+    hermes_root = _hermes_source_root()
+    root_candidates = [
         ("user", get_skills_dir()),
-        ("bundled", PROJECT_ROOT / "skills"),
-        ("optional", get_optional_skills_dir(PROJECT_ROOT / "optional-skills")),
+        ("bundled", hermes_root / "skills"),
+        ("optional", get_optional_skills_dir(hermes_root / "optional-skills")),
     ]
-    roots.extend(("external", path) for path in get_external_skills_dirs())
+    root_candidates.extend(("external", path) for path in get_external_skills_dirs())
+    roots = []
+    seen_roots: set[Path] = set()
+    for source, root in root_candidates:
+        root = Path(root)
+        resolved = _resolved_path(root)
+        if resolved in seen_roots:
+            continue
+        seen_roots.add(resolved)
+        roots.append((source, root, resolved))
+
     disabled = get_disabled_skill_names()
-    seen: set[str] = set()
+    records_by_name: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     skills: List[Dict[str, Any]] = []
     duplicates: List[Dict[str, Any]] = []
+    shadowed: List[Dict[str, Any]] = []
+    errors: List[Dict[str, Any]] = []
 
-    for source, root in roots:
+    for precedence, (source, root, root_id) in enumerate(roots):
         if not root.exists():
             continue
         for skill_md in iter_skill_index_files(root, "SKILL.md"):
             try:
-                content = skill_md.read_text(encoding="utf-8")[:5000]
-                frontmatter, body = parse_frontmatter(content)
+                raw_content = skill_md.read_text(encoding="utf-8")
+                frontmatter, body = parse_frontmatter(raw_content[:5000])
                 if not skill_matches_platform(frontmatter):
                     continue
                 rel = skill_md.relative_to(root)
                 skill_dir = skill_md.parent
                 name = str(frontmatter.get("name") or skill_dir.name)[:64]
-                if name in seen:
-                    duplicates.append({"name": name, "path": str(skill_md), "source": source})
-                    continue
-                seen.add(name)
                 description = str(frontmatter.get("description") or "").strip()
                 if not description:
                     for line in body.splitlines():
@@ -527,7 +557,7 @@ def _load_skill_inventory() -> Dict[str, Any]:
                             description = line
                             break
                 category = rel.parts[0] if len(rel.parts) > 2 else None
-                skills.append({
+                records_by_name[name].append({
                     "name": name,
                     "description": _preview(description, 220),
                     "category": category,
@@ -537,16 +567,68 @@ def _load_skill_inventory() -> Dict[str, Any]:
                     "relative_path": str(rel),
                     "last_modified": skill_md.stat().st_mtime,
                     "file_count": sum(1 for p in skill_dir.rglob("*") if p.is_file()),
+                    "_root_id": str(root_id),
+                    "_content_hash": hashlib.sha256(raw_content.encode("utf-8")).hexdigest(),
+                    "_precedence": precedence,
                 })
             except Exception as exc:
-                duplicates.append({"name": skill_md.parent.name, "path": str(skill_md), "source": source, "error": str(exc)})
+                errors.append({"name": skill_md.parent.name, "path": str(skill_md), "source": source, "error": str(exc)})
                 continue
+
+    for name, records in records_by_name.items():
+        records.sort(key=lambda item: (item.get("_precedence", 99), item.get("relative_path") or "", item.get("path") or ""))
+        winner = records[0]
+        skills.append(winner)
+        same_source_seen = {(winner["_root_id"], winner["source"]): winner}
+        for record in records[1:]:
+            same_source_key = (record["_root_id"], record["source"])
+            if same_source_key in same_source_seen:
+                duplicates.append({
+                    "name": name,
+                    "path": record["path"],
+                    "source": record["source"],
+                    "relative_path": record["relative_path"],
+                    "duplicate_of": same_source_seen[same_source_key]["path"],
+                    "reason": "same_root_name_collision",
+                })
+                continue
+            if record["source"] == winner["source"]:
+                duplicates.append({
+                    "name": name,
+                    "path": record["path"],
+                    "source": record["source"],
+                    "relative_path": record["relative_path"],
+                    "duplicate_of": winner["path"],
+                    "reason": "same_precedence_name_collision",
+                })
+                continue
+            shadowed.append({
+                "name": name,
+                "path": record["path"],
+                "source": record["source"],
+                "relative_path": record["relative_path"],
+                "shadowed_by": {
+                    "path": winner["path"],
+                    "source": winner["source"],
+                },
+                "relation": "identical_content" if record["_content_hash"] == winner["_content_hash"] else "override",
+            })
+
+    for item in skills:
+        item.pop("_root_id", None)
+        item.pop("_content_hash", None)
+        item.pop("_precedence", None)
 
     skills.sort(key=lambda item: (item.get("source") or "", item.get("category") or "", item.get("name") or ""))
     return {
         "skills": skills,
         "total": len(skills),
         "duplicates": duplicates[:50],
+        "duplicate_count": len(duplicates),
+        "shadowed": shadowed[:50],
+        "shadowed_count": len(shadowed),
+        "errors": errors[:50],
+        "error_count": len(errors),
         "disabled_count": sum(1 for item in skills if not item["enabled"]),
         "generated_at": _now(),
     }
@@ -637,6 +719,7 @@ def _markdown_report(session_id: str) -> str:
 @router.get("/health")
 async def health():
     home = get_hermes_home()
+    hermes_root = _hermes_source_root()
     state_db = home / "state.db"
     return {
         "ok": True,
@@ -646,7 +729,7 @@ async def health():
         "state_db_exists": state_db.exists(),
         "data_sources": {
             "sessions": state_db.exists(),
-            "skills": (home / "skills").exists() or (PROJECT_ROOT / "skills").exists(),
+            "skills": (home / "skills").exists() or (hermes_root / "skills").exists(),
             "cron": (home / "cron").exists(),
         },
         "generated_at": _now(),

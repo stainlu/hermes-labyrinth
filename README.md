@@ -20,7 +20,7 @@ unknown work.
 ## Demo
 
 - Live demo: https://stainlu.github.io/hermes-labyrinth/
-- Current release: [`v0.1.2`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.2)
+- Current release: [`v0.1.3`](https://github.com/stainlu/hermes-labyrinth/releases/tag/v0.1.3)
 - Hermes Agent: https://github.com/NousResearch/hermes-agent
 
 The public demo is static and uses mocked Hermes state so it can run on GitHub
@@ -34,7 +34,8 @@ dashboard plugin routes.
 - **Inspector**: input, output, duration, status, evidence, and guideposts for
   a selected crossing.
 - **Guideposts**: generated observations backed by local evidence.
-- **Skill atlas**: bundled, optional, external, and user skill inventory.
+- **Skill atlas**: effective skills plus shadowed overrides and true
+  duplicate diagnostics.
 - **Cron gate**: scheduled autonomy, next runs, last failures, and workdirs.
 - **Model ferry**: model/provider transitions across sessions.
 - **Reports**: redacted Markdown and JSON exports for one journey.
@@ -224,9 +225,13 @@ GET /api/plugins/hermes-labyrinth/reports/{journey_id}.json
 GET /api/plugins/hermes-labyrinth/reports/{journey_id}.md
 ```
 
+`/skills` returns effective `skills`, expected `shadowed` overrides, true
+`duplicates`, and scan `errors` separately so normal user-over-bundled
+overrides do not hide real filesystem problems.
+
 ## Project Status
 
-`v0.1.2` is a hackathon preview that is stable enough to demo and install as a
+`v0.1.3` is a hackathon preview that is stable enough to demo and install as a
 read-only dashboard plugin. The public demo and main UI flows are covered by
 browser smoke tests; full Hermes dashboard integration tests are still on the
 roadmap.
