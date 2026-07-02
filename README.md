@@ -39,6 +39,9 @@ dashboard plugin routes.
 - **Cron gate**: scheduled autonomy, next runs, last failures, and workdirs.
 - **Model ferry**: model/provider transitions across sessions.
 - **Reports**: redacted Markdown and JSON exports for one journey.
+- **Plugin-aware traces**: tool calls from installed Hermes plugins, such as
+  [Hermes Tweet](https://github.com/Xquik-dev/hermes-tweet), appear as normal
+  crossings with the same read-only evidence and redaction path.
 
 ## Install
 
