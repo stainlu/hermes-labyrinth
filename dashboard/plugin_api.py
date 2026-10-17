@@ -43,7 +43,9 @@ def _redact(value: Any) -> str:
     try:
         from agent.redact import redact_sensitive_text
 
-        return redact_sensitive_text(text)
+        # Observability exports must not leak user:pass@ URL credentials;
+        # the Hermes default keeps them to preserve OAuth/magic-link flows.
+        return redact_sensitive_text(text, redact_url_credentials=True)
     except Exception:
         return REDACTION_UNAVAILABLE
 
